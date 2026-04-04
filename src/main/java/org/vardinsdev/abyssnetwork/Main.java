@@ -15,6 +15,7 @@ import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
 import org.vardinsdev.abyssnetwork.events.GamemodeSwitcherEvent;
 import org.vardinsdev.abyssnetwork.events.PlayerConfigurationEvent;
+import org.vardinsdev.minegun.HealthManagement;
 import org.vardinsdev.minegun.Weapons.Rifle;
 import org.vardinsdev.minegun.Weapons.RocketLauncher;
 import rocks.minestom.placement.BannerPlacementRule;
@@ -147,6 +148,7 @@ public class Main {
 
         PlayerConfigurationEvent.register(instanceContainer, globalEventHandler);
 
+        HealthManagement.register();
         Rifle.register(instanceContainer);
         RocketLauncher.register(instanceContainer);
 
