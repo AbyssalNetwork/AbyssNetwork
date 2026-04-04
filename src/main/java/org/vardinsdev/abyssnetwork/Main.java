@@ -2,35 +2,23 @@ package org.vardinsdev.abyssnetwork;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import net.hollowcube.polar.PolarLoader;
-import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.timer.SchedulerManager;
 import org.vardinsdev.abyssnetwork.Database.DatabaseManager;
-import org.vardinsdev.minegun.Events.PlayerLoadedEventHandler;
-import org.vardinsdev.minegun.Events.PlayerTickEventHandler;
-import org.vardinsdev.minegun.Weapons.Rifle;
-import org.vardinsdev.minegun.Weapons.RocketLauncher;
 import net.minestom.server.Auth;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
-import net.minestom.server.event.player.PlayerGameModeRequestEvent;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
-import org.vardinsdev.minegun.demo.TestDummy;
-import org.vardinsdev.minegun.demo.giveCommand;
-import org.vardinsdev.minegun.minegunLogger;
 import rocks.minestom.placement.BannerPlacementRule;
 import rocks.minestom.placement.Utility;
 import rocks.minestom.placement.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.security.Key;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -191,7 +179,7 @@ public class Main {
             try (Connection conn = DatabaseManager.getConnection()) {
                 // Using "ON DUPLICATE KEY UPDATE" handles both new and returning players in one go
                 String query = "INSERT INTO players (uuid, username) VALUES (?, ?) " +
-                        "ON DUPLICATE KEY UPDATE username = ?";
+                        "\\" + " DUPLICATE KEY UPDATE username = ?";
 
                 try (PreparedStatement stmt = conn.prepareStatement(query)) {
                     stmt.setString(1, uuid);
