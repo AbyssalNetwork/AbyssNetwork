@@ -13,7 +13,10 @@ import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
+import org.vardinsdev.abyssnetwork.events.GamemodeSwitcherEvent;
 import org.vardinsdev.abyssnetwork.events.PlayerConfigurationEvent;
+import org.vardinsdev.minegun.Weapons.Rifle;
+import org.vardinsdev.minegun.Weapons.RocketLauncher;
 import rocks.minestom.placement.BannerPlacementRule;
 import rocks.minestom.placement.Utility;
 import rocks.minestom.placement.*;
@@ -143,6 +146,12 @@ public class Main {
         GlobalEventHandler globalEventHandler = MinecraftServer.getGlobalEventHandler();
 
         PlayerConfigurationEvent.register(instanceContainer, globalEventHandler);
+
+        Rifle.register(instanceContainer);
+        RocketLauncher.register(instanceContainer);
+
+
+        GamemodeSwitcherEvent.register();
 
         // World defining
         try {
