@@ -24,7 +24,7 @@ tasks.withType<JavaExec> {
 
 dependencies {
     implementation("net.minestom:minestom:2026.03.03-1.21.11")
-    implementation("com.github.AbyssalNetwork:minegun:1.0.2")
+    implementation("com.github.AbyssalNetwork:minegun:1.0.3")
     implementation("rocks.minestom:placement:0.1.0")
     implementation("org.slf4j:slf4j-simple:2.0.13")
     implementation("com.mysql:mysql-connector-j:9.3.0")
