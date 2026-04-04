@@ -9,7 +9,7 @@ public class PlayerConfigurationEvent {
     public static void register(InstanceContainer instanceContainer, GlobalEventHandler eventHandler) {
         eventHandler.addListener(AsyncPlayerConfigurationEvent.class, event -> {
             event.setSpawningInstance(instanceContainer);
-            event.getPlayer().setRespawnPoint(new Pos(0, 42, 0));
+            event.getPlayer().setRespawnPoint(new Pos(-18.5, 34.0, 13.5));
         });
     }
 }
