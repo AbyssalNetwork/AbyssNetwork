@@ -10,6 +10,18 @@ repositories {
     maven("https://jitpack.io")
 }
 
+tasks.withType<JavaExec> {
+    // Allows the terminal to accept your keyboard input (for commands)
+    standardInput = System.`in`
+
+    // These arguments silence the Java 25 / Minestom warnings
+    jvmArgs(
+        "--enable-native-access=ALL-UNNAMED",
+        "--add-modules=jdk.unsupported",
+        "-XX:+IgnoreUnrecognizedVMOptions"
+    )
+}
+
 dependencies {
     implementation("net.minestom:minestom:2026.03.03-1.21.11")
     implementation("com.github.AbyssalNetwork:minegun:1.0.1")

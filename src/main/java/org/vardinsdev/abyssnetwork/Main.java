@@ -7,6 +7,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.timer.SchedulerManager;
 import org.vardinsdev.abyssnetwork.Database.DatabaseManager;
+import org.vardinsdev.abyssnetwork.events.PlayerConfigurationEvent;
 import org.vardinsdev.minegun.Events.PlayerLoadedEventHandler;
 import org.vardinsdev.minegun.Events.PlayerTickEventHandler;
 import org.vardinsdev.minegun.Weapons.Rifle;
@@ -117,6 +118,13 @@ public class Main {
 
         Dotenv env = Dotenv.load();
 
+
+
+        MinecraftServer minecraftServer = MinecraftServer.init(new Auth.Online());
+        AbyssLogger.success("Server Initiated!");
+        registerPlacementRules();
+        AbyssLogger.success("Placement Rules Registered!");
+
         if (!Objects.equals(env.get("TYPE"), "dev")) {
             try {
                 DatabaseManager.connect(
@@ -127,6 +135,7 @@ public class Main {
                         env.get("DB_PASSWORD")
                 );
                 AbyssLogger.success("Connected to the database!");
+                registerEvents();
             } catch (SQLException e) {
                 AbyssLogger.error("Failed to connect to the database: " + e.getMessage());
                 return; // Stop the server from starting if the DB is required
@@ -135,20 +144,15 @@ public class Main {
             AbyssLogger.info("You are running in dev mode! No database connections made!");
         }
 
-
-
-        MinecraftServer minecraftServer = MinecraftServer.init(new Auth.Online());
-        AbyssLogger.success("Server Initiated!");
-        registerPlacementRules();
-        AbyssLogger.success("Placement Rules Registered!");
-
-        registerEvents();
-
         // Instance
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
         InstanceContainer instanceContainer = instanceManager.createInstanceContainer();
 
         instanceContainer.setChunkSupplier(LightingChunk::new);
+
+        GlobalEventHandler eventHandler = MinecraftServer.getGlobalEventHandler();
+
+        PlayerConfigurationEvent.register(instanceContainer, eventHandler);
 
         // World defining
         try {
