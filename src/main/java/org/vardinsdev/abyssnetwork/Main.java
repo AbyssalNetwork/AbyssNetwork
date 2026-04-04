@@ -34,6 +34,7 @@ import java.security.Key;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Objects;
 
 public class Main {
     private static void registerPlacementRules() {
@@ -116,26 +117,32 @@ public class Main {
 
         Dotenv env = Dotenv.load();
 
-        try {
-            DatabaseManager.connect(
-                    env.get("DB_HOST"),
-                    Integer.parseInt(env.get("DB_PORT")),
-                    env.get("DB_NAME"),
-                    env.get("DB_USER"),
-                    env.get("DB_PASSWORD")
-            );
-            AbyssLogger.success("Connected to the database!");
-        } catch (SQLException e) {
-            AbyssLogger.error("Failed to connect to the database: " + e.getMessage());
-            return; // Stop the server from starting if the DB is required
+        if (!Objects.equals(env.get("TYPE"), "dev")) {
+            try {
+                DatabaseManager.connect(
+                        env.get("DB_HOST"),
+                        Integer.parseInt(env.get("DB_PORT")),
+                        env.get("DB_NAME"),
+                        env.get("DB_USER"),
+                        env.get("DB_PASSWORD")
+                );
+                AbyssLogger.success("Connected to the database!");
+            } catch (SQLException e) {
+                AbyssLogger.error("Failed to connect to the database: " + e.getMessage());
+                return; // Stop the server from starting if the DB is required
+            }
+        } else {
+            AbyssLogger.info("You are running in dev mode! No database connections made!");
         }
 
-        registerEvents();
+
 
         MinecraftServer minecraftServer = MinecraftServer.init(new Auth.Online());
         AbyssLogger.success("Server Initiated!");
         registerPlacementRules();
         AbyssLogger.success("Placement Rules Registered!");
+
+        registerEvents();
 
         // Instance
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
