@@ -13,6 +13,7 @@ import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
+import org.vardinsdev.abyssnetwork.events.PlayerConfigurationEvent;
 import rocks.minestom.placement.BannerPlacementRule;
 import rocks.minestom.placement.Utility;
 import rocks.minestom.placement.*;
@@ -105,6 +106,12 @@ public class Main {
 
         Dotenv env = Dotenv.load();
 
+        MinecraftServer minecraftServer = MinecraftServer.init(new Auth.Online());
+        AbyssLogger.success("Server Initiated!");
+        registerPlacementRules();
+        AbyssLogger.success("Placement Rules Registered!");
+
+
         if (!Objects.equals(env.get("TYPE"), "dev")) {
             try {
                 DatabaseManager.connect(
@@ -115,6 +122,8 @@ public class Main {
                         env.get("DB_PASSWORD")
                 );
                 AbyssLogger.success("Connected to the database!");
+                registerEvents();
+                AbyssLogger.info("Database Events Registered!");
             } catch (SQLException e) {
                 AbyssLogger.error("Failed to connect to the database: " + e.getMessage());
                 return; // Stop the server from starting if the DB is required
@@ -125,18 +134,15 @@ public class Main {
 
 
 
-        MinecraftServer minecraftServer = MinecraftServer.init(new Auth.Online());
-        AbyssLogger.success("Server Initiated!");
-        registerPlacementRules();
-        AbyssLogger.success("Placement Rules Registered!");
-
-        registerEvents();
-
         // Instance
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
         InstanceContainer instanceContainer = instanceManager.createInstanceContainer();
 
         instanceContainer.setChunkSupplier(LightingChunk::new);
+
+        GlobalEventHandler globalEventHandler = MinecraftServer.getGlobalEventHandler();
+
+        PlayerConfigurationEvent.register(instanceContainer, globalEventHandler);
 
         // World defining
         try {
