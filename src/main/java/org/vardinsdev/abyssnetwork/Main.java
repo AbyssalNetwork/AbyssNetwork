@@ -13,6 +13,7 @@ import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
+import org.vardinsdev.abyssnetwork.events.ChatHandlerEvent;
 import org.vardinsdev.abyssnetwork.events.GamemodeSwitcherEvent;
 import org.vardinsdev.abyssnetwork.events.PlayerConfigurationEvent;
 import org.vardinsdev.minegun.HealthManagement;
@@ -152,6 +153,7 @@ public class Main {
         Rifle.register(instanceContainer);
         RocketLauncher.register(instanceContainer);
 
+        ChatHandlerEvent.register();
 
         GamemodeSwitcherEvent.register();
 
