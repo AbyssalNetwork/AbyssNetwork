@@ -104,7 +104,7 @@ public class Main {
         Utility.registerPlacementRules(CactusFlowerPlacementRule::new, Block.CACTUS_FLOWER);
         Utility.registerPlacementRules(RailPlacementRule::new, RailPlacementRule.KEY);
     }
-    static void main() {
+    public static void main(String[] args) {
         AbyssLogger.printBanner();
         AbyssLogger.info("Starting Abyss Network...");
 

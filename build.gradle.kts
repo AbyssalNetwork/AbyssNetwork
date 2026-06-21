@@ -1,9 +1,14 @@
 plugins {
     id("java")
+    id("application")  // ← adds the `run` task
 }
 
 group = "org.vardinsdev.abyssnetwork"
 version = "1.0-SNAPSHOT"
+
+application {
+    mainClass.set("org.vardinsdev.abyssnetwork.Main")  // ← tells Gradle where to start
+}
 
 repositories {
     mavenCentral()
@@ -11,10 +16,7 @@ repositories {
 }
 
 tasks.withType<JavaExec> {
-    // Allows the terminal to accept your keyboard input (for commands)
     standardInput = System.`in`
-
-    // These arguments silence the Java 25 / Minestom warnings
     jvmArgs(
         "--enable-native-access=ALL-UNNAMED",
         "--add-modules=jdk.unsupported",
