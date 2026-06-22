@@ -27,6 +27,12 @@ public class ChatHandlerEvent {
                         AbyssLogger.error("Formatted Message did not get formatted properly!" + e);
                     }
                 }
+            } else {
+                AbyssLogger.info("Chat: " + event.getRawMessage());
+                event.setCancelled(true);
+                for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+                    onlinePlayer.sendMessage(Component.text(event.getPlayer().getUsername() + " >> " + event.getRawMessage()));
+                }
             }
         });
     }
