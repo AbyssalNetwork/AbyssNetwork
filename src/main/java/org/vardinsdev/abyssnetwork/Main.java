@@ -3,6 +3,7 @@ package org.vardinsdev.abyssnetwork;
 import io.github.cdimascio.dotenv.Dotenv;
 import net.hollowcube.polar.PolarLoader;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.player.PlayerLoadedEvent;
 import net.minestom.server.timer.SchedulerManager;
 import org.vardinsdev.abyssnetwork.Database.DatabaseManager;
 import net.minestom.server.Auth;
@@ -13,9 +14,10 @@ import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
-import org.vardinsdev.abyssnetwork.events.ChatHandlerEvent;
-import org.vardinsdev.abyssnetwork.events.GamemodeSwitcherEvent;
-import org.vardinsdev.abyssnetwork.events.PlayerConfigurationEvent;
+import org.vardinsdev.abyssnetwork.events.ChatHandler;
+import org.vardinsdev.abyssnetwork.events.GamemodeSwitcher;
+import org.vardinsdev.abyssnetwork.events.PlayerConfiguration;
+import org.vardinsdev.abyssnetwork.events.PlayerLoaded;
 import org.vardinsdev.minegun.HealthManagement;
 import org.vardinsdev.minegun.Weapons.Rifle;
 import org.vardinsdev.minegun.Weapons.RocketLauncher;
@@ -147,15 +149,16 @@ public class Main {
 
         GlobalEventHandler globalEventHandler = MinecraftServer.getGlobalEventHandler();
 
-        PlayerConfigurationEvent.register(instanceContainer, globalEventHandler);
+        PlayerConfiguration.register(instanceContainer);
+        PlayerLoaded.register();
 
         HealthManagement.register();
         Rifle.register(instanceContainer);
         RocketLauncher.register(instanceContainer);
 
-        ChatHandlerEvent.register();
+        ChatHandler.register();
 
-        GamemodeSwitcherEvent.register();
+        GamemodeSwitcher.register();
 
         // World defining
         try {

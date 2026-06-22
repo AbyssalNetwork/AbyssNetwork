@@ -8,7 +8,7 @@ import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.PlayerChatEvent;
 import org.vardinsdev.abyssnetwork.AbyssLogger;
 
-public class ChatHandlerEvent {
+public class ChatHandler {
     public static void register() {
         GlobalEventHandler eventHandler = MinecraftServer.getGlobalEventHandler();
         eventHandler.addListener(PlayerChatEvent.class, event -> {
