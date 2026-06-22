@@ -3,9 +3,8 @@ package org.vardinsdev.abyssnetwork;
 import io.github.cdimascio.dotenv.Dotenv;
 import net.hollowcube.polar.PolarLoader;
 import net.minestom.server.entity.Player;
-import net.minestom.server.event.player.PlayerLoadedEvent;
 import net.minestom.server.timer.SchedulerManager;
-import org.vardinsdev.abyssnetwork.Database.DatabaseManager;
+import org.vardinsdev.abyssnetwork.notUsedAnymore.Database.DatabaseManager;
 import net.minestom.server.Auth;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.GlobalEventHandler;
@@ -118,29 +117,6 @@ public class Main {
         registerPlacementRules();
         AbyssLogger.success("Placement Rules Registered!");
 
-
-        if (!Objects.equals(env.get("TYPE"), "dev")) {
-            try {
-                DatabaseManager.connect(
-                        env.get("DB_HOST"),
-                        Integer.parseInt(env.get("DB_PORT")),
-                        env.get("DB_NAME"),
-                        env.get("DB_USER"),
-                        env.get("DB_PASSWORD")
-                );
-                AbyssLogger.success("Connected to the database!");
-                registerEvents();
-                AbyssLogger.info("Database Events Registered!");
-            } catch (SQLException e) {
-                AbyssLogger.error("Failed to connect to the database: " + e.getMessage());
-                return; // Stop the server from starting if the DB is required
-            }
-        } else {
-            AbyssLogger.info("You are running in dev mode! No database connections made!");
-        }
-
-
-
         // Instance
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
         InstanceContainer instanceContainer = instanceManager.createInstanceContainer();
@@ -171,11 +147,6 @@ public class Main {
          */
         SchedulerManager scheduler = MinecraftServer.getSchedulerManager();
         scheduler.buildShutdownTask(() -> {
-            try {
-                DatabaseManager.disconnect();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
             MinecraftServer.getConnectionManager().shutdown();
             try {
                 instanceContainer.saveChunksToStorage();
@@ -189,32 +160,6 @@ public class Main {
 
         minecraftServer.start("0.0.0.0", 25565);
         AbyssLogger.success("Server started on port 25565");
-    }
-    public static void registerEvents() {
-        GlobalEventHandler globalEventHandler = MinecraftServer.getGlobalEventHandler();
-
-        globalEventHandler.addListener(AsyncPlayerConfigurationEvent.class, event -> {
-            Player player = event.getPlayer();
-            String uuid = player.getUuid().toString();
-            String name = player.getUsername();
-
-            try (Connection conn = DatabaseManager.getConnection()) {
-                // Using "ON DUPLICATE KEY UPDATE" handles both new and returning players in one go
-                String query = "INSERT INTO players (uuid, username) VALUES (?, ?) " +
-                        "\\" + " DUPLICATE KEY UPDATE username = ?";
-
-                try (PreparedStatement stmt = conn.prepareStatement(query)) {
-                    stmt.setString(1, uuid);
-                    stmt.setString(2, name);
-                    stmt.setString(3, name);
-                    stmt.executeUpdate();
-                }
-
-                AbyssLogger.info("Player data synchronized for: " + name);
-            } catch (SQLException e) {
-                AbyssLogger.error("Could not sync player data for " + name + ": " + e.getMessage());
-            }
-        });
     }
 }
 

@@ -1,4 +1,4 @@
-package org.vardinsdev.abyssnetwork;
+package org.vardinsdev.abyssnetwork.notUsedAnymore.Database;
 
 import io.github.cdimascio.dotenv.Dotenv;
 

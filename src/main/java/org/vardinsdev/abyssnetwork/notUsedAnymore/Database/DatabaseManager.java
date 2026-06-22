@@ -1,4 +1,4 @@
-package org.vardinsdev.abyssnetwork.Database;
+package org.vardinsdev.abyssnetwork.notUsedAnymore.Database;
 
 import org.vardinsdev.abyssnetwork.AbyssLogger;
 

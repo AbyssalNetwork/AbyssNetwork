@@ -7,7 +7,7 @@ import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.instance.InstanceContainer;
 import org.vardinsdev.abyssnetwork.AbyssLogger;
-import org.vardinsdev.abyssnetwork.envHandler;
+import org.vardinsdev.abyssnetwork.notUsedAnymore.Database.envHandler;
 
 import java.util.Objects;
 
