@@ -18,11 +18,11 @@ public class HelpCommand extends Command{
 
                 player.sendMessage(""); // Spacer
 
-                player.sendMessage(Component.text("- help provides information on how each command works").color(NamedTextColor.AQUA));
+                player.sendMessage(Component.text("- '/help' provides information on how each command works").color(NamedTextColor.AQUA));
 
                 player.sendMessage(""); // Spacer
 
-                player.sendMessage(Component.text("- give (weapon name) is used to provide yourself with the defined weapon.").color(NamedTextColor.AQUA));
+                player.sendMessage(Component.text("- '/class' changes your weapon preference.").color(NamedTextColor.AQUA));
             }
         });
     }

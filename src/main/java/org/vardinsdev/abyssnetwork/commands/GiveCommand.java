@@ -14,16 +14,16 @@ public class GiveCommand extends Command{
         super("give");
 
         var item = ArgumentType.Word("item-given")
-                .from("RocketLauncher", "Rifle"); // Auto Fill
+                .from("Rifle", "RocketLauncher"); // Auto Fill
 
         addSyntax((sender, context) -> {
-            if (sender instanceof Player p) {
-                if (p.getPermissionLevel() >= 2) {
-                    if (context.get(item).equalsIgnoreCase("rocketLauncher")) {
-                        RocketLauncher.givePlayer(p);
-                    }
+            if (sender instanceof Player player) {
+                if (player.getPermissionLevel() >= 2) {
                     if (context.get(item).equalsIgnoreCase("rifle")) {
-                        Rifle.givePlayer(p);
+                        Rifle.givePlayer(player);
+                    }
+                    if (context.get(item).equalsIgnoreCase("rocketLauncher")) {
+                        RocketLauncher.givePlayer(player);
                     }
                 }
             } else {

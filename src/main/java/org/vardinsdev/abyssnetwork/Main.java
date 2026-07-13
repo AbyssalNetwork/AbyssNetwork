@@ -2,7 +2,7 @@ package org.vardinsdev.abyssnetwork;
 
 import net.hollowcube.polar.PolarLoader;
 import net.minestom.server.timer.SchedulerManager;
-import org.vardinsdev.abyssnetwork.commands.GiveCommand;
+import org.vardinsdev.abyssnetwork.commands.*;
 import net.minestom.server.Auth;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.GlobalEventHandler;
@@ -10,7 +10,6 @@ import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
-import org.vardinsdev.abyssnetwork.commands.HelpCommand;
 import org.vardinsdev.abyssnetwork.events.ChatHandler;
 import org.vardinsdev.abyssnetwork.events.GamemodeSwitcher;
 import org.vardinsdev.abyssnetwork.events.PlayerConfiguration;
@@ -101,7 +100,7 @@ public class Main {
         Utility.registerPlacementRules(CactusFlowerPlacementRule::new, Block.CACTUS_FLOWER);
         Utility.registerPlacementRules(RailPlacementRule::new, RailPlacementRule.KEY);
     }
-    public static void main(String[] args) {
+     static void main(String[] args) {
         AbyssLogger.printBanner();
         AbyssLogger.info("Starting Abyss Network...");
 
@@ -131,6 +130,10 @@ public class Main {
 
         MinecraftServer.getCommandManager().register(new GiveCommand());
         MinecraftServer.getCommandManager().register(new HelpCommand());
+        MinecraftServer.getCommandManager().register(new GiveRankCommand());
+        MinecraftServer.getCommandManager().register(new StaffHelpCommand());
+        MinecraftServer.getCommandManager().register(new VanishCommand());
+        MinecraftServer.getCommandManager().register(new WeaponChangerCommand());
 
         GamemodeSwitcher.register();
 
