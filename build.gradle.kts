@@ -34,6 +34,7 @@ dependencies {
     implementation("io.github.cdimascio:dotenv-java:3.2.0")
     implementation("it.unimi.dsi:fastutil:8.5.12")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.3.3")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
 }
 
 tasks.test {
