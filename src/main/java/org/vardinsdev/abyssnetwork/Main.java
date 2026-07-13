@@ -11,6 +11,7 @@ import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
 import org.vardinsdev.abyssnetwork.commands.HelpCommand;
+import org.vardinsdev.abyssnetwork.commands.StaffHelpCommand;
 import org.vardinsdev.abyssnetwork.events.ChatHandler;
 import org.vardinsdev.abyssnetwork.events.GamemodeSwitcher;
 import org.vardinsdev.abyssnetwork.events.PlayerConfiguration;
@@ -101,7 +102,7 @@ public class Main {
         Utility.registerPlacementRules(CactusFlowerPlacementRule::new, Block.CACTUS_FLOWER);
         Utility.registerPlacementRules(RailPlacementRule::new, RailPlacementRule.KEY);
     }
-    public static void main(String[] args) {
+     static void main(String[] args) {
         AbyssLogger.printBanner();
         AbyssLogger.info("Starting Abyss Network...");
 
@@ -131,6 +132,7 @@ public class Main {
 
         MinecraftServer.getCommandManager().register(new GiveCommand());
         MinecraftServer.getCommandManager().register(new HelpCommand());
+        MinecraftServer.getCommandManager().register(new StaffHelpCommand());
 
         GamemodeSwitcher.register();
 
