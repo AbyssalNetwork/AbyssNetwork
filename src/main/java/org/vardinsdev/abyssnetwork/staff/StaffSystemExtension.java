@@ -38,7 +38,7 @@ public class StaffSystemExtension {
 
             if (StaffManager.getInstance().isStaff(playerUuid)) {
                 StaffMember staff = StaffManager.getInstance().getStaff(playerUuid);
-                player.sendMessage("[StaffSystem] Loaded in as " + staff.getRank());
+                player.sendMessage(Component.text("[StaffSystem] Loaded in as " + staff.getRank()).color(NamedTextColor.RED));
             }
         });
         // Add this inside your existing register() method in StaffSystemExtension
