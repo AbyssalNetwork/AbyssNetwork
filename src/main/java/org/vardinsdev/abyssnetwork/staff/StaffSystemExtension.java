@@ -45,8 +45,8 @@ public class StaffSystemExtension {
         globalEventHandler.addListener(net.minestom.server.event.player.PlayerSpawnEvent.class, event -> {
             Player joiningPlayer = event.getPlayer();
             boolean isJoiningStaff = StaffManager.getInstance().isStaff(joiningPlayer.getUuid());
-
-            if (isJoiningStaff) {
+            StaffMember staff = StaffManager.getInstance().getStaff(joiningPlayer.getUuid());
+            if (staff != null && staff.isVanished()) {
                 joiningPlayer.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
                 joiningPlayer.sendMessage(Component.text("You have joined in vanish!").color(NamedTextColor.AQUA));
                 joiningPlayer.addEffect(new Potion(PotionEffect.NIGHT_VISION, (byte) 1, Potion.INFINITE_DURATION));
@@ -56,8 +56,7 @@ public class StaffSystemExtension {
             if (!isJoiningStaff) {
                 for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
                     if (StaffManager.getInstance().isStaff(onlinePlayer.getUuid())) {
-                        StaffMember staff = StaffManager.getInstance().getStaff(onlinePlayer.getUuid());
-
+                        staff = StaffManager.getInstance().getStaff(onlinePlayer.getUuid());
                         if (staff.isVanished()) {
                             // Hide the vanished staff member from this new regular player
                             onlinePlayer.removeViewer(joiningPlayer);
