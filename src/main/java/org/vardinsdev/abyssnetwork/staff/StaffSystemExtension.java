@@ -38,6 +38,7 @@ public class StaffSystemExtension {
 
             if (StaffManager.getInstance().isStaff(playerUuid)) {
                 StaffMember staff = StaffManager.getInstance().getStaff(playerUuid);
+                player.setPermissionLevel(StaffRank.valueOf(staff.getRank().toString()).getPermissionLevel());
                 player.sendMessage(Component.text("[StaffSystem] Loaded in as " + staff.getRank()).color(NamedTextColor.RED));
             }
         });
