@@ -120,7 +120,8 @@ public class Main {
         StaffSystemExtension.register();
         MinecraftServer.getCommandManager().register(new VanishCommand());
         MinecraftServer.getCommandManager().register(new StaffHelpCommand());
-         MinecraftServer.getCommandManager().register(new GiveRankCommand());
+        MinecraftServer.getCommandManager().register(new GiveRankCommand());
+        MinecraftServer.getCommandManager().register(new FireCommand());
 
         PlayerConfiguration.register(instanceContainer);
         PlayerLoaded.register();

@@ -9,6 +9,8 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
+import org.vardinsdev.abyssnetwork.AbyssLogger;
+import org.vardinsdev.abyssnetwork.staff.StaffManager;
 
 import java.io.File;
 import java.util.UUID;
@@ -38,57 +40,62 @@ public class GiveRankCommand extends Command {
                 sender.sendMessage("Player must be online to assign a rank via this simple command example!");
                 return;
             }
+            if (StaffManager.getInstance().isStaff(sender.identity().uuid())) {
+                UUID uuid = targetPlayer.getUuid();
 
-            UUID uuid = targetPlayer.getUuid();
+                try {
+                    ObjectNode rootNode;
+                    ObjectNode staffNode;
 
-            try {
-                ObjectNode rootNode;
-                ObjectNode staffNode;
-
-                // 1. Read existing file or create a fresh structure if missing
-                if (STAFF_FILE.exists()) {
-                    rootNode = (ObjectNode) MAPPER.readTree(STAFF_FILE);
-                    staffNode = (ObjectNode) rootNode.get("staff");
-                    if (staffNode == null) {
+                    // 1. Read existing file or create a fresh structure if missing
+                    if (STAFF_FILE.exists()) {
+                        rootNode = (ObjectNode) MAPPER.readTree(STAFF_FILE);
+                        staffNode = (ObjectNode) rootNode.get("staff");
+                        if (staffNode == null) {
+                            staffNode = MAPPER.createObjectNode();
+                            rootNode.set("staff", staffNode);
+                        }
+                    } else {
+                        STAFF_FILE.getParentFile().mkdirs();
+                        rootNode = MAPPER.createObjectNode();
                         staffNode = MAPPER.createObjectNode();
                         rootNode.set("staff", staffNode);
                     }
-                } else {
-                    STAFF_FILE.getParentFile().mkdirs();
-                    rootNode = MAPPER.createObjectNode();
-                    staffNode = MAPPER.createObjectNode();
-                    rootNode.set("staff", staffNode);
+
+                    // 2. Create the updated staff member details
+                    ObjectNode memberDetails = MAPPER.createObjectNode();
+                    memberDetails.put("uuid", uuid.toString());
+                    memberDetails.put("lastKnownName", targetName);
+                    memberDetails.put("rank", rankName);
+                    memberDetails.put("vanished", false);
+
+                    // 3. Put it under the player's UUID key inside the "staff" block
+                    staffNode.set(uuid.toString(), memberDetails);
+
+                    // 4. Write the updated payload back to disk asynchronously
+                    java.util.concurrent.CompletableFuture.runAsync(() -> {
+                        try {
+                            MAPPER.writeValue(STAFF_FILE, rootNode);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    });
+
+                    sender.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                    sender.sendMessage(Component.text("Successfully set " + targetName + "'s rank to " + rankName).color(NamedTextColor.AQUA));
+
+                    targetPlayer.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                    targetPlayer.sendMessage(Component.text("Your staff rank has been updated to " + rankName).color(NamedTextColor.AQUA));
+
+                    AbyssLogger.warn(sender + " has given " + targetName + " the rank of " + rankName);
+
+                } catch (Exception e) {
+                    sender.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                    sender.sendMessage("Error updating staff file!");
+                    e.printStackTrace();
                 }
-
-                // 2. Create the updated staff member details
-                ObjectNode memberDetails = MAPPER.createObjectNode();
-                memberDetails.put("uuid", uuid.toString());
-                memberDetails.put("lastKnownName", targetName);
-                memberDetails.put("rank", rankName);
-                memberDetails.put("vanished", false);
-
-                // 3. Put it under the player's UUID key inside the "staff" block
-                staffNode.set(uuid.toString(), memberDetails);
-
-                // 4. Write the updated payload back to disk asynchronously
-                java.util.concurrent.CompletableFuture.runAsync(() -> {
-                    try {
-                        MAPPER.writeValue(STAFF_FILE, rootNode);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                });
-
-                sender.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-                sender.sendMessage(Component.text("Successfully set " + targetName + "'s rank to " + rankName).color(NamedTextColor.AQUA));
-
-                targetPlayer.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-                targetPlayer.sendMessage(Component.text("Your staff rank has been updated to " + rankName).color(NamedTextColor.AQUA));
-
-            } catch (Exception e) {
-                sender.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-                sender.sendMessage("Error updating staff file!");
-                e.printStackTrace();
+            } else {
+                sender.sendMessage("You must be staff to give a rank!");
             }
 
         }, playerArgument, rankArgument);

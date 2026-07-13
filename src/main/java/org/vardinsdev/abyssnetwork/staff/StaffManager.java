@@ -60,6 +60,11 @@ public class StaffManager {
         saveStaffAsync();
     }
 
+    public void removeStaff(UUID uuid) {
+        staffCache.remove(uuid);
+        saveStaffAsync(); // Persists the removal to staff.json right away
+    }
+
     private static class StaffDataWrapper {
         private Map<UUID, StaffMember> staff;
         public Map<UUID, StaffMember> getStaff() { return staff; }
