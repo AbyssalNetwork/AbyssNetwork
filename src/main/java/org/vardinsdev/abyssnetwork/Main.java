@@ -18,6 +18,7 @@ import org.vardinsdev.abyssnetwork.events.ChatHandler;
 import org.vardinsdev.abyssnetwork.events.GamemodeSwitcher;
 import org.vardinsdev.abyssnetwork.events.PlayerConfiguration;
 import org.vardinsdev.abyssnetwork.events.PlayerLoaded;
+import org.vardinsdev.abyssnetwork.staff.StaffSystemExtension;
 import org.vardinsdev.minegun.HealthManagement;
 import org.vardinsdev.minegun.Weapons.Rifle;
 import org.vardinsdev.minegun.Weapons.RocketLauncher;
@@ -123,6 +124,8 @@ public class Main {
         instanceContainer.setChunkSupplier(LightingChunk::new);
 
         GlobalEventHandler globalEventHandler = MinecraftServer.getGlobalEventHandler();
+
+        StaffSystemExtension.register();
 
         PlayerConfiguration.register(instanceContainer);
         PlayerLoaded.register();
