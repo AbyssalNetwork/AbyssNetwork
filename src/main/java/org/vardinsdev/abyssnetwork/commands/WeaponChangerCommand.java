@@ -22,7 +22,6 @@ public class WeaponChangerCommand extends Command {
                         player.getInventory().clear();
                         Rifle.givePlayer(player);
 
-                        player.sendMessage(""); // Spacer
                         player.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
                         player.sendMessage(Component.text("You have changed your weapon preference to 'Rifle'.").color(NamedTextColor.AQUA));
                     }
@@ -30,7 +29,6 @@ public class WeaponChangerCommand extends Command {
                         player.getInventory().clear();
                         RocketLauncher.givePlayer(player);
 
-                        player.sendMessage(""); // Spacer
                         player.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
                         player.sendMessage(Component.text("You have changed your weapon preference to 'Rocket Launcher'.").color(NamedTextColor.AQUA));
                     }
