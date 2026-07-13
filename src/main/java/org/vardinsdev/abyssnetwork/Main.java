@@ -118,6 +118,9 @@ public class Main {
         GlobalEventHandler globalEventHandler = MinecraftServer.getGlobalEventHandler();
 
         StaffSystemExtension.register();
+        MinecraftServer.getCommandManager().register(new VanishCommand());
+        MinecraftServer.getCommandManager().register(new StaffHelpCommand());
+         MinecraftServer.getCommandManager().register(new GiveRankCommand());
 
         PlayerConfiguration.register(instanceContainer);
         PlayerLoaded.register();
@@ -130,9 +133,6 @@ public class Main {
 
         MinecraftServer.getCommandManager().register(new GiveCommand());
         MinecraftServer.getCommandManager().register(new HelpCommand());
-        MinecraftServer.getCommandManager().register(new GiveRankCommand());
-        MinecraftServer.getCommandManager().register(new StaffHelpCommand());
-        MinecraftServer.getCommandManager().register(new VanishCommand());
         MinecraftServer.getCommandManager().register(new WeaponChangerCommand());
 
         GamemodeSwitcher.register();

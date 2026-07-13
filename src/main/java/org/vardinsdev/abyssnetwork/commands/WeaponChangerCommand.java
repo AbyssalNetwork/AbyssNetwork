@@ -28,6 +28,6 @@ public class WeaponChangerCommand extends Command {
                         RocketLauncher.givePlayer(player);
                         player.sendMessage(Component.text("You have changed your weapon preference to 'Rocket Launcher'.").color(NamedTextColor.AQUA).decorate(TextDecoration.BOLD));
                     }
-        }
-                });
+            }
+        }, item);
 }}
