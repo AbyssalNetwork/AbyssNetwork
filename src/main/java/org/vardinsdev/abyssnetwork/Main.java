@@ -1,19 +1,16 @@
 package org.vardinsdev.abyssnetwork;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import net.hollowcube.polar.PolarLoader;
-import net.minestom.server.entity.Player;
 import net.minestom.server.timer.SchedulerManager;
 import org.vardinsdev.abyssnetwork.commands.GiveCommand;
-import org.vardinsdev.abyssnetwork.notUsedAnymore.Database.DatabaseManager;
 import net.minestom.server.Auth;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.GlobalEventHandler;
-import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
+import org.vardinsdev.abyssnetwork.commands.HelpCommand;
 import org.vardinsdev.abyssnetwork.events.ChatHandler;
 import org.vardinsdev.abyssnetwork.events.GamemodeSwitcher;
 import org.vardinsdev.abyssnetwork.events.PlayerConfiguration;
@@ -28,10 +25,6 @@ import rocks.minestom.placement.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Objects;
 
 public class Main {
     private static void registerPlacementRules() {
@@ -137,6 +130,7 @@ public class Main {
         ChatHandler.register();
 
         MinecraftServer.getCommandManager().register(new GiveCommand());
+        MinecraftServer.getCommandManager().register(new HelpCommand());
 
         GamemodeSwitcher.register();
 
