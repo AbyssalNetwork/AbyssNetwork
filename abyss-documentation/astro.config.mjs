@@ -6,14 +6,17 @@ import starlight from '@astrojs/starlight';
 export default defineConfig({
 	integrations: [
 		starlight({
-			title: 'My Docs',
-			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withastro/starlight' }],
+			title: 'AbyssNetwork',
+			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/AbyssalNetwork' }],
 			sidebar: [
 				{
 					label: 'Guides',
 					items: [
 						// Each item here is one entry in the navigation menu.
-						{ label: 'Example Guide', slug: 'guides/example' },
+						{ label: 'Getting Started', slug: 'guides/gettingstarted' },
+						{ label: 'Help Command', slug: 'guides/helpcommand' },
+						{ label: 'Staff Help Command', slug: 'guides/staffhelpcommand' },
+						{ label: 'Weapon Changer Command', slug: 'guides/weaponchangercommand' },
 					],
 				},
 				{
