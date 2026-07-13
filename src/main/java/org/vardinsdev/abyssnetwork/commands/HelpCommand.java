@@ -15,7 +15,6 @@ public class HelpCommand extends Command{
         addSyntax((sender, context) -> {
             if(sender instanceof Player player) {
 
-                player.sendMessage(""); // Spacer
                 player.sendMessage(Component.text("AbyssNetwork: Help").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
 
                 player.sendMessage(""); // Spacer

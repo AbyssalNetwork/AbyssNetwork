@@ -1,5 +1,8 @@
 package org.vardinsdev.abyssnetwork.commands;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
 import net.minestom.server.potion.Potion;
@@ -38,17 +41,20 @@ public class VanishCommand extends Command {
                     }
 
                     if (nextVanishState) {
-                        player.sendMessage("You are now vanished! (Hidden from regular players)");
+                        player.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                        player.sendMessage(Component.text("You are now vanished! (Hidden from regular players)").color(NamedTextColor.AQUA));
                         player.addEffect(new Potion(PotionEffect.NIGHT_VISION, (byte) 1, Potion.INFINITE_DURATION));
 
                     } else {
-                        player.sendMessage("You are no longer vanished.");
+                        player.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                        player.sendMessage(Component.text("You are no longer vanished.").color(NamedTextColor.AQUA));
                         player.removeEffect(PotionEffect.NIGHT_VISION);
                     }
 
                     StaffManager.getInstance().saveStaffAsync();
                 } else {
-                    sender.sendMessage("You must be a staff member to use this command!");
+                    sender.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                    sender.sendMessage(Component.text("You must be a staff member to use this command!").color(NamedTextColor.AQUA));
                 }
             } else {
                 minegunLogger.error("Console tried to vanish itself!");

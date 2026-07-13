@@ -1,5 +1,8 @@
 package org.vardinsdev.abyssnetwork.staff;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.GlobalEventHandler;
@@ -44,7 +47,8 @@ public class StaffSystemExtension {
             boolean isJoiningStaff = StaffManager.getInstance().isStaff(joiningPlayer.getUuid());
 
             if (isJoiningStaff) {
-                joiningPlayer.sendMessage("You have joined in vanish!");
+                joiningPlayer.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                joiningPlayer.sendMessage(Component.text("You have joined in vanish!").color(NamedTextColor.AQUA));
                 joiningPlayer.addEffect(new Potion(PotionEffect.NIGHT_VISION, (byte) 1, Potion.INFINITE_DURATION));
             }
 

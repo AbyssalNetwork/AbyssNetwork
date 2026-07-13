@@ -3,6 +3,9 @@ package org.vardinsdev.abyssnetwork.commands;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
@@ -76,10 +79,14 @@ public class GiveRankCommand extends Command {
                     }
                 });
 
-                sender.sendMessage("Successfully set " + targetName + "'s rank to " + rankName);
-                targetPlayer.sendMessage("Your staff rank has been updated to " + rankName);
+                sender.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                sender.sendMessage(Component.text("Successfully set " + targetName + "'s rank to " + rankName).color(NamedTextColor.AQUA));
+
+                targetPlayer.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                targetPlayer.sendMessage(Component.text("Your staff rank has been updated to " + rankName).color(NamedTextColor.AQUA));
 
             } catch (Exception e) {
+                sender.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
                 sender.sendMessage("Error updating staff file!");
                 e.printStackTrace();
             }
