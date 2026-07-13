@@ -10,7 +10,6 @@ import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
 
 import org.vardinsdev.minegun.Weapons.RocketLauncher;
-import org.vardinsdev.minegun.minegunLogger;
 
 public class GiveCommand extends Command{
 
