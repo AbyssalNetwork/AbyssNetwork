@@ -13,11 +13,16 @@ public class HelpCommand extends Command{
 
         addSyntax((sender, context) -> {
             if(sender instanceof Player player) {
-                player.sendMessage(Component.text("|| HELP ||" +
-                        "  "
-                ));
-                player.sendMessage(Component.text("/give (weapon name) is used to provide yourself with the defined weapon.").color(NamedTextColor.RED));
-                player.sendMessage(Component.text("/test -- LOREM IPSUM").color(NamedTextColor.DARK_AQUA));
+                player.sendMessage(Component.text("|| AbyssNetwork: HELP ||").color(NamedTextColor.DARK_PURPLE));
+
+                player.sendMessage(""); // Spacer
+                player.sendMessage(""); // Spacer
+
+                player.sendMessage(Component.text("/give (weapon name) is used to provide yourself with the defined weapon.").color(NamedTextColor.AQUA));
+
+                player.sendMessage(""); // Spacer
+
+                player.sendMessage(Component.text("/test -- LOREM IPSUM").color(NamedTextColor.AQUA));
             }
         });
     }
