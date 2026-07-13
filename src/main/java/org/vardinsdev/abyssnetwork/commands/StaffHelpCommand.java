@@ -21,6 +21,9 @@ public class StaffHelpCommand extends Command{
 
                     player.sendMessage(""); // Spacer
                     player.sendMessage(Component.text("- '/give' (weapon name) is used to provide yourself with the defined weapon.").color(NamedTextColor.AQUA));
+                } else {
+                    player.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                    player.sendMessage(Component.text("You must be a staff member to use this command.").color(NamedTextColor.AQUA))
                 }
             }
         }));
