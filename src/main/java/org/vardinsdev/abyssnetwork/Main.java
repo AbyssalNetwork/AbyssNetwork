@@ -4,6 +4,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 import net.hollowcube.polar.PolarLoader;
 import net.minestom.server.entity.Player;
 import net.minestom.server.timer.SchedulerManager;
+import org.vardinsdev.abyssnetwork.commands.GiveCommand;
 import org.vardinsdev.abyssnetwork.notUsedAnymore.Database.DatabaseManager;
 import net.minestom.server.Auth;
 import net.minestom.server.MinecraftServer;
@@ -110,8 +111,6 @@ public class Main {
         AbyssLogger.printBanner();
         AbyssLogger.info("Starting Abyss Network...");
 
-        Dotenv env = Dotenv.load();
-
         MinecraftServer minecraftServer = MinecraftServer.init(new Auth.Online());
         AbyssLogger.success("Server Initiated!");
         registerPlacementRules();
@@ -133,6 +132,8 @@ public class Main {
         RocketLauncher.register(instanceContainer);
 
         ChatHandler.register();
+
+        MinecraftServer.getCommandManager().register(new GiveCommand());
 
         GamemodeSwitcher.register();
 
