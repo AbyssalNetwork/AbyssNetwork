@@ -3,6 +3,7 @@ package org.vardinsdev.abyssnetwork.commands;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.vardinsdev.abyssnetwork.AbyssLogger;
 import org.vardinsdev.minegun.Weapons.Rifle;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
@@ -34,7 +35,7 @@ public class GiveCommand extends Command{
                     }
                 }
             } else {
-                minegunLogger.error("Console tried to give itself a rocket launcher!");
+                AbyssLogger.error("Console tried to give itself a rocket launcher!");
             }
         }, item);
     }
