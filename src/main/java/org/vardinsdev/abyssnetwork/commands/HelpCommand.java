@@ -14,14 +14,14 @@ public class HelpCommand extends Command{
 
         addSyntax((sender, context) -> {
             if(sender instanceof Player player) {
-                player.sendMessage(Component.text("|| AbyssNetwork: Help ||").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
 
                 player.sendMessage(""); // Spacer
+                player.sendMessage(Component.text("AbyssNetwork: Help").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
 
+                player.sendMessage(""); // Spacer
                 player.sendMessage(Component.text("- '/help' provides information on how each command works").color(NamedTextColor.AQUA));
 
                 player.sendMessage(""); // Spacer
-
                 player.sendMessage(Component.text("- '/class' changes your weapon preference.").color(NamedTextColor.AQUA));
             }
         });
