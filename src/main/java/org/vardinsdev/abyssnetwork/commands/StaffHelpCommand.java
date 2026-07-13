@@ -14,7 +14,7 @@ public class StaffHelpCommand extends Command{
             if(sender instanceof Player player) {
                 if(player.getPermissionLevel() >= 2) {
 
-                    player.sendMessage(Component.text("AbyssNetwork: Staff Information").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                    player.sendMessage(Component.text("Abyss Network: Staff Information").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
 
                     player.sendMessage(""); // Spacer
                     player.sendMessage(Component.text("- To use staff chat: %text").color(NamedTextColor.AQUA));

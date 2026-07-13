@@ -1,6 +1,8 @@
 package org.vardinsdev.abyssnetwork.commands;
 
-import it.unimi.dsi.fastutil.io.FastByteArrayInputStream;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
@@ -26,7 +28,8 @@ public class FireCommand extends Command {
             Player targetPlayer = MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(targetName);
 
             if (targetPlayer == null) {
-                sender.sendMessage("Player must be online to fire them via this command!");
+                sender.sendMessage(Component.text("AbyssNetwork Staff System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                sender.sendMessage(Component.text("Player must be online to fire them via this command!").color(NamedTextColor.AQUA));
                 return;
             }
 
@@ -34,7 +37,8 @@ public class FireCommand extends Command {
 
             // 1. Check if the target is actually part of the staff team
             if (!StaffManager.getInstance().isStaff(uuid)) {
-                sender.sendMessage(targetName + " is not a registered staff member.");
+                sender.sendMessage(Component.text("AbyssNetwork Staff System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                sender.sendMessage(Component.text(targetName + " is not a registered staff member.").color(NamedTextColor.AQUA));
                 return;
             }
 
@@ -46,8 +50,11 @@ public class FireCommand extends Command {
             targetPlayer.setPermissionLevel(0);
 
             // 3. Notify the executor and the target player
-            sender.sendMessage("Successfully fired " + targetName + " (removed from rank " + oldRankName + ").");
-            targetPlayer.sendMessage("You have been relieved of your duties and removed from the staff team.");
+            sender.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+            sender.sendMessage(Component.text("Successfully fired " + targetName + " (removed from rank " + oldRankName + ".").color(NamedTextColor.AQUA));
+
+            targetPlayer.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+            targetPlayer.sendMessage(Component.text("You have been relieved of your duties and removed from the staff team.").color(NamedTextColor.AQUA));
 
             // Log the action
             AbyssLogger.warn("[StaffSystem] " + sender.identity().identity().identity().identity().toString() + " FIRED " + targetName + " (was " + oldRankName + ")");
