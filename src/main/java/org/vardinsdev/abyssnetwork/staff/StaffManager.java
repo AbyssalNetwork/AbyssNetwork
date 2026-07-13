@@ -11,6 +11,9 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class StaffManager {
+    private static final StaffManager INSTANCE = new StaffManager();
+    public static StaffManager getInstance() { return INSTANCE; }
+
     private final File dataFile = new File("config/staff.json");
     private final ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
     private final Map<UUID, StaffMember> staffCache = new HashMap<>();

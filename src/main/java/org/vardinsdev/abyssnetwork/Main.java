@@ -10,7 +10,9 @@ import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
+import org.vardinsdev.abyssnetwork.commands.GiveRankCommand;
 import org.vardinsdev.abyssnetwork.commands.HelpCommand;
+import org.vardinsdev.abyssnetwork.commands.VanishCommand;
 import org.vardinsdev.abyssnetwork.events.ChatHandler;
 import org.vardinsdev.abyssnetwork.events.GamemodeSwitcher;
 import org.vardinsdev.abyssnetwork.events.PlayerConfiguration;
@@ -119,6 +121,8 @@ public class Main {
         GlobalEventHandler globalEventHandler = MinecraftServer.getGlobalEventHandler();
 
         StaffSystemExtension.register();
+        MinecraftServer.getCommandManager().register(new GiveRankCommand());
+        MinecraftServer.getCommandManager().register(new VanishCommand());
 
         PlayerConfiguration.register(instanceContainer);
         PlayerLoaded.register();

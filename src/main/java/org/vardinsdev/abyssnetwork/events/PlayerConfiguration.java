@@ -8,6 +8,8 @@ import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.instance.InstanceContainer;
 import org.vardinsdev.abyssnetwork.AbyssLogger;
 import org.vardinsdev.abyssnetwork.notUsedAnymore.Database.envHandler;
+import org.vardinsdev.abyssnetwork.staff.StaffManager;
+import org.vardinsdev.abyssnetwork.staff.StaffMember;
 
 import java.util.Objects;
 
@@ -15,12 +17,18 @@ public class PlayerConfiguration {
     public static void register(InstanceContainer instanceContainer) {
         GlobalEventHandler eventHandler = MinecraftServer.getGlobalEventHandler();
         eventHandler.addListener(AsyncPlayerConfigurationEvent.class, event -> {
+            var player = event.getPlayer();
+
             event.setSpawningInstance(instanceContainer);
-            event.getPlayer().setRespawnPoint(new Pos(-18.5, 34.0, 13.5));
-            Dotenv env = envHandler.register();
-            if (Objects.equals(env.get("TYPE"), "dev")) {
-                event.getPlayer().setPermissionLevel(4);
-                AbyssLogger.info(event.getPlayer().getUsername() + " has been given permission level 4 because of dev mode");
+            player.setRespawnPoint(new Pos(-18.5, 34.0, 13.5));
+
+            if (StaffManager.getInstance().isStaff(player.getUuid())) {
+                StaffMember staff = StaffManager.getInstance().getStaff(player.getUuid());
+
+                // Automatically pulls the assigned integer permission level directly from the enum
+                player.setPermissionLevel(staff.getRank().getPermissionLevel());
+
+                AbyssLogger.info("[StaffSystem] Set " + player.getUsername() + "'s permission level to " + staff.getRank().getPermissionLevel() + " (" + staff.getRank().name() + ")");
             }
         });
     }
