@@ -57,7 +57,7 @@ public class FireCommand extends Command {
             targetPlayer.sendMessage(Component.text("You have been relieved of your duties and removed from the staff team.").color(NamedTextColor.AQUA));
 
             // Log the action
-            AbyssLogger.warn("[StaffSystem] " + sender.identity().identity().identity().identity().toString() + " FIRED " + targetName + " (was " + oldRankName + ")");
+            AbyssLogger.warn("[StaffSystem] " + sender.identity().identity().identity().identity() + " FIRED " + targetName + " (was " + oldRankName + ")");
 
 
         }, playerArgument);
