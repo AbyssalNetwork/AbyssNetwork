@@ -1,15 +1,15 @@
 {
   "staff" : {
-    "62c45d08-8e26-42b4-baa5-924428e72ce6" : {
-      "uuid" : "62c45d08-8e26-42b4-baa5-924428e72ce6",
-      "lastKnownName" : "Red_out",
-      "rank" : "LEAD_DEVELOPER",
-      "vanished" : false
-    },
     "93e00cfa-893d-46ba-8248-d8fcefc9327e" : {
       "uuid" : "93e00cfa-893d-46ba-8248-d8fcefc9327e",
       "lastKnownName" : "RufusRedRocket",
       "rank" : "OWNER",
+      "vanished" : "false"
+    },
+    "62c45d08-8e26-42b4-baa5-924428e72ce6" : {
+      "uuid" : "62c45d08-8e26-42b4-baa5-924428e72ce6",
+      "lastKnownName" : "Red_out",
+      "rank" : "LEAD_DEVELOPER",
       "vanished" : false
     }
   }
