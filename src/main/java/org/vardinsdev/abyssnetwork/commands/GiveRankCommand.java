@@ -5,15 +5,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
-import net.minestom.server.command.builder.arguments.minecraft.ArgumentEntity;
-import net.minestom.server.command.builder.arguments.number.ArgumentInteger;
-import net.minestom.server.command.builder.arguments.ArgumentWord;
 import net.minestom.server.entity.Player;
-import net.minestom.server.utils.entity.EntityFinder;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class GiveRankCommand extends Command {
