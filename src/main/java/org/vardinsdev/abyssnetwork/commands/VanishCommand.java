@@ -41,7 +41,7 @@ public class VanishCommand extends Command {
 
                                     } else {
                                         if (staff.getRank().ordinal() <= StaffManager.getInstance().getStaff(onlinePlayer.getUuid()).getRank().ordinal()) {
-                                            onlinePlayer.sendMessage(Component.text("[STAFF]" + player.getName() + "has joined in Vanish").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                                            onlinePlayer.sendMessage(Component.text("[STAFF]" + player.getName() + "have joined in Vanish").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
                                         }
                                     }
                                 } else {
