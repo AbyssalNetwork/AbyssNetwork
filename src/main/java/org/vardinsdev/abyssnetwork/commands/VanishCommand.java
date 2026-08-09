@@ -17,54 +17,55 @@ public class VanishCommand extends Command {
         super("vanish");
 
         addSyntax((sender, context) -> {
-            if (sender instanceof Player player) {
-                if (StaffManager.getInstance().isStaff(player.getUuid())) {
-                    StaffMember staff = StaffManager.getInstance().getStaff(player.getUuid());
+                    if (sender instanceof Player player) {
+                        if (StaffManager.getInstance().isStaff(player.getUuid())) {
+                            StaffMember staff = StaffManager.getInstance().getStaff(player.getUuid());
 
-                    boolean nextVanishState = !staff.isVanished();
-                    staff.setVanished(nextVanishState);
+                            boolean nextVanishState = !staff.isVanished();
+                            staff.setVanished(nextVanishState);
 
-                    // Loop through all online players to update who can see this staff member
-                    for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
-                        if (onlinePlayer.equals(player)) continue; // Skip self
+                            // Loop through all online players to update who can see this staff member
+                            for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+                                if (onlinePlayer.equals(player)) continue; // Skip self
 
-                        boolean isTargetStaff = StaffManager.getInstance().isStaff(onlinePlayer.getUuid());
+                                boolean isTargetStaff = StaffManager.getInstance().isStaff(onlinePlayer.getUuid());
 
-                        if (nextVanishState) {
-                            // We are vanishing! Hide from normal players, keep visible for staff
-                            if (!isTargetStaff) {
-                                player.removeViewer(onlinePlayer);
+                                if (nextVanishState) {
+                                    // We are vanishing! Hide from normal players, keep visible for staff
+                                    if (!isTargetStaff) {
+                                        player.removeViewer(onlinePlayer);
 
-                            } else {
-                                if (staff.getRank().ordinal() <= StaffManager.getInstance().getStaff(onlinePlayer.getUuid()).getRank().ordinal()) {
-                                    onlinePlayer.sendMessage(Component.text("[STAFF]" + player.getDisplayName() + "has joined in Vanish").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                                    } else {
+                                        if (staff.getRank().ordinal() <= StaffManager.getInstance().getStaff(onlinePlayer.getUuid()).getRank().ordinal()) {
+                                            onlinePlayer.sendMessage(Component.text("[STAFF]" + player.getDisplayName() + "has joined in Vanish").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                                        }
+                                    }
+                                } else {
+                                    // We are unvanishing! Show to everyone
+                                    player.addViewer(onlinePlayer);
                                 }
                             }
+
+                            if (nextVanishState)
+                                player.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                            player.sendMessage(Component.text("You are now vanished! (Hidden from regular players)").color(NamedTextColor.AQUA));
+                            player.addEffect(new Potion(PotionEffect.NIGHT_VISION, (byte) 1, Potion.INFINITE_DURATION));
+
                         } else {
-                            // We are unvanishing! Show to everyone
-                            player.addViewer(onlinePlayer);
+                            player.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                            player.sendMessage(Component.text("You are no longer vanished.").color(NamedTextColor.AQUA));
+                            player.removeEffect(PotionEffect.NIGHT_VISION);
                         }
-                    }
 
-                    if (nextVanishState)
-    player.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-    player.sendMessage(Component.text("You are now vanished! (Hidden from regular players)").color(NamedTextColor.AQUA));
-    player.addEffect(new Potion(PotionEffect.NIGHT_VISION, (byte) 1, Potion.INFINITE_DURATION));
-
+                        StaffManager.getInstance().updateStaff(new StaffMember());
                     } else {
-                        player.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-                        player.sendMessage(Component.text("You are no longer vanished.").color(NamedTextColor.AQUA));
-                        player.removeEffect(PotionEffect.NIGHT_VISION);
+                        sender.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                        sender.sendMessage(Component.text("You must be a staff member to use this command!").color(NamedTextColor.AQUA));
                     }
-
-                    StaffManager.getInstance().updateStaff(staff);
                 } else {
-                    sender.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-                    sender.sendMessage(Component.text("You must be a staff member to use this command!").color(NamedTextColor.AQUA));
-                }
-            } else {
-                AbyssLogger.error("Console tried to vanish itself!");
-            }
-        });
-    }
-}
+            AbyssLogger.error("Console tried to vanish itself!");
+
+        }
+        {
+            };
+        }};
