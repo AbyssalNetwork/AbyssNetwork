@@ -2,6 +2,8 @@ package org.vardinsdev.abyssnetwork;
 
 import net.hollowcube.polar.PolarLoader;
 import net.minestom.server.timer.SchedulerManager;
+import org.vardinsdev.abyssnetwork.Database.ApiClient;
+import org.vardinsdev.abyssnetwork.Database.PlayerSync;
 import org.vardinsdev.abyssnetwork.commands.*;
 import net.minestom.server.Auth;
 import net.minestom.server.MinecraftServer;
@@ -12,6 +14,7 @@ import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
 import org.vardinsdev.abyssnetwork.events.ChatHandler;
 import org.vardinsdev.abyssnetwork.events.GamemodeSwitcher;
+import org.vardinsdev.abyssnetwork.events.KillTracker;
 import org.vardinsdev.abyssnetwork.events.PlayerConfiguration;
 import org.vardinsdev.abyssnetwork.events.PlayerLoaded;
 import org.vardinsdev.abyssnetwork.staff.StaffSystemExtension;
@@ -117,6 +120,9 @@ public class Main {
 
         GlobalEventHandler globalEventHandler = MinecraftServer.getGlobalEventHandler();
 
+        ApiClient.getInstance().init();
+        PlayerSync.register();
+
         StaffSystemExtension.register();
         MinecraftServer.getCommandManager().register(new VanishCommand());
         MinecraftServer.getCommandManager().register(new StaffHelpCommand());
@@ -126,6 +132,7 @@ public class Main {
         PlayerConfiguration.register(instanceContainer);
         PlayerLoaded.register();
 
+        KillTracker.register(); // must precede HealthManagement.register()
         HealthManagement.register();
         Rifle.register(instanceContainer);
         RocketLauncher.register(instanceContainer);
@@ -135,6 +142,7 @@ public class Main {
         MinecraftServer.getCommandManager().register(new GiveCommand());
         MinecraftServer.getCommandManager().register(new HelpCommand());
         MinecraftServer.getCommandManager().register(new WeaponChangerCommand());
+        MinecraftServer.getCommandManager().register(new StatsCommand());
 
         GamemodeSwitcher.register();
 
