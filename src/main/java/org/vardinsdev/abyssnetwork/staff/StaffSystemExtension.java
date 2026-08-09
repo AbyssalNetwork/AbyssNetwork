@@ -15,6 +15,22 @@ import java.util.UUID;
 
 public class StaffSystemExtension {
 
+    /**
+     * Applies the vanish viewable rule to the given (currently vanished) player.
+     * Must be re-applied on spawn because each reconnect creates a new Player
+     * entity that loses the previous instance's rule.
+     */
+    public static void applyVanishRule(Player vanishedPlayer) {
+        vanishedPlayer.updateViewableRule(viewer -> {
+            if (viewer == vanishedPlayer) return true; // self always visible
+            StaffMember vanishing = StaffManager.getInstance().getStaff(vanishedPlayer.getUuid());
+            if (vanishing == null) return true; // no longer staff -> fully visible
+            StaffMember target = StaffManager.getInstance().getStaff(viewer.getUuid());
+            if (target == null) return false; // regular players cannot see
+            return vanishing.getRank().ordinal() <= target.getRank().ordinal();
+        });
+    }
+
     public static void register() {
         // Load staff from the API into the in-memory cache on startup.
         StaffManager.getInstance().loadStaff();
@@ -34,23 +50,15 @@ public class StaffSystemExtension {
 
         globalEventHandler.addListener(PlayerSpawnEvent.class, event -> {
             Player joiningPlayer = event.getPlayer();
-            boolean isJoiningStaff = StaffManager.getInstance().isStaff(joiningPlayer.getUuid());
 
+            // If the joining player is themselves vanished, re-apply the hide rule
+            // and let them know. The rule is per-entity, so it must be set again on join.
             StaffMember joiningStaff = StaffManager.getInstance().getStaff(joiningPlayer.getUuid());
             if (joiningStaff != null && joiningStaff.isVanished()) {
+                applyVanishRule(joiningPlayer);
                 joiningPlayer.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
                 joiningPlayer.sendMessage(Component.text("You have joined in vanish!").color(NamedTextColor.AQUA));
                 joiningPlayer.addEffect(new Potion(PotionEffect.NIGHT_VISION, (byte) 1, Potion.INFINITE_DURATION));
-            }
-
-            // If the joining player is a regular player, hide all currently vanished staff from them.
-            if (!isJoiningStaff) {
-                for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
-                    StaffMember staff = StaffManager.getInstance().getStaff(onlinePlayer.getUuid());
-                    if (staff != null && staff.isVanished()) {
-                        onlinePlayer.removeViewer(joiningPlayer);
-                    }
-                }
             }
         });
     }

@@ -11,6 +11,7 @@ import net.minestom.server.potion.PotionEffect;
 import org.vardinsdev.abyssnetwork.AbyssLogger;
 import org.vardinsdev.abyssnetwork.staff.StaffManager;
 import org.vardinsdev.abyssnetwork.staff.StaffMember;
+import org.vardinsdev.abyssnetwork.staff.StaffSystemExtension;
 
 public class VanishCommand extends Command {
     public VanishCommand() {
@@ -24,48 +25,39 @@ public class VanishCommand extends Command {
                     boolean nextVanishState = !staff.isVanished();
                     staff.setVanished(nextVanishState);
 
-                    // Loop through all online players to update who can see this staff member
-                    for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
-                        if (onlinePlayer.equals(player)) continue; // Skip self
-
-                        boolean isTargetStaff = StaffManager.getInstance().isStaff(onlinePlayer.getUuid());
-
-                        if (nextVanishState) {
-                            // We are vanishing! Hide from normal players, keep visible for staff
-                            if (!isTargetStaff) {
-                                player.removeViewer(onlinePlayer);
-                            } else {
-                                if (staff.getRank().ordinal() <= StaffManager.getInstance().getStaff(onlinePlayer.getUuid()).getRank().ordinal()) {
-                                    onlinePlayer.sendMessage(Component.text("[STAFF] " + player.getName() + " has vanished").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-                                } else {
-                                    player.removeViewer(onlinePlayer);
-                                }
-                            }
-                        } else {
-                            // We are unvanishing! Show to everyone
-                            player.addViewer(onlinePlayer);
-                        }
-                    }
-
                     if (nextVanishState) {
+                        // Hide from regular players and lower-ranked staff. Minestom re-applies
+                        // this rule automatically (new joins, chunk loads), so the vanish sticks.
+                        StaffSystemExtension.applyVanishRule(player);
+
+                        // Notify equal-or-higher ranked staff
+                        for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+                            if (onlinePlayer == player) continue;
+                            StaffMember target = StaffManager.getInstance().getStaff(onlinePlayer.getUuid());
+                            if (target != null && staff.getRank().ordinal() <= target.getRank().ordinal()) {
+                                onlinePlayer.sendMessage(Component.text("[STAFF] " + player.getUsername() + " has vanished").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                            }
+                        }
+
                         player.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
                         player.sendMessage(Component.text("You are now vanished! (Hidden from regular players)").color(NamedTextColor.AQUA));
                         player.addEffect(new Potion(PotionEffect.NIGHT_VISION, (byte) 1, Potion.INFINITE_DURATION));
 
                     } else {
+                        player.updateViewableRule(null);
+
                         player.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
                         player.sendMessage(Component.text("You are no longer vanished.").color(NamedTextColor.AQUA));
                         player.removeEffect(PotionEffect.NIGHT_VISION);
                     }
 
-                    StaffManager.getInstance().updateStaff(new StaffMember());
+                    StaffManager.getInstance().updateStaff(staff);
                 } else {
                     sender.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
                     sender.sendMessage(Component.text("You must be a staff member to use this command!").color(NamedTextColor.AQUA));
                 }
             } else {
                 AbyssLogger.error("Console tried to vanish itself!");
-
             }
         });
     }
