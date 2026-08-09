@@ -52,6 +52,10 @@ public class ChatHandler {
     }
 
     private static void sendGlobalChat(Player player, String message) {
+        boolean isStaff = StaffManager.getInstance().isStaff(player.getUuid());
+        if (isStaff) {
+            //String rank =
+        }
         AbyssLogger.info("Chat: " + player.getUsername() + " >> " + message);
         Component chatComponent = Component.text(player.getUsername() + " >> " + message);
 
