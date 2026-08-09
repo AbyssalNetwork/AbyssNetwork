@@ -1,0 +1,39 @@
+services:
+  db:
+    image: mariadb:11
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: abyssnetwork
+      MARIADB_USER: abyss
+      MARIADB_PASSWORD: abyss
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build: .
+    image: abyss-api
+    environment:
+      ABYSS_DB_HOST: db
+      ABYSS_DB_PORT: "3306"
+      ABYSS_DB_NAME: abyssnetwork
+      ABYSS_DB_USER: abyss
+      ABYSS_DB_PASSWORD: abyss
+      ABYSS_HTTP_ADDR: ":8080"
+      ABYSS_API_TOKEN: ${ABYSS_API_TOKEN:-c3a1d4f4a40b7c9f189c16dbcb20dca90c3f3e1d2709eb71}
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  db-data:

@@ -1,25 +1,32 @@
 package org.vardinsdev.abyssnetwork;
 
 import net.hollowcube.polar.PolarLoader;
-import net.minestom.server.timer.SchedulerManager;
-import org.vardinsdev.abyssnetwork.commands.*;
 import net.minestom.server.Auth;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.timer.SchedulerManager;
+import org.vardinsdev.abyssnetwork.Database.ApiClient;
+import org.vardinsdev.abyssnetwork.Database.PlayerSync;
+import org.vardinsdev.abyssnetwork.commands.FireCommand;
+import org.vardinsdev.abyssnetwork.commands.GiveCommand;
+import org.vardinsdev.abyssnetwork.commands.GiveRankCommand;
+import org.vardinsdev.abyssnetwork.commands.HelpCommand;
+import org.vardinsdev.abyssnetwork.commands.StaffHelpCommand;
+import org.vardinsdev.abyssnetwork.commands.StatsCommand;
+import org.vardinsdev.abyssnetwork.commands.VanishCommand;
+import org.vardinsdev.abyssnetwork.commands.WeaponChangerCommand;
 import org.vardinsdev.abyssnetwork.events.ChatHandler;
 import org.vardinsdev.abyssnetwork.events.GamemodeSwitcher;
+import org.vardinsdev.abyssnetwork.events.KillTracker;
 import org.vardinsdev.abyssnetwork.events.PlayerConfiguration;
 import org.vardinsdev.abyssnetwork.events.PlayerLoaded;
 import org.vardinsdev.abyssnetwork.staff.StaffSystemExtension;
 import org.vardinsdev.minegun.HealthManagement;
 import org.vardinsdev.minegun.Weapons.Rifle;
 import org.vardinsdev.minegun.Weapons.RocketLauncher;
-import rocks.minestom.placement.BannerPlacementRule;
-import rocks.minestom.placement.Utility;
 import rocks.minestom.placement.*;
 
 import java.io.IOException;
@@ -100,7 +107,7 @@ public class Main {
         Utility.registerPlacementRules(CactusFlowerPlacementRule::new, Block.CACTUS_FLOWER);
         Utility.registerPlacementRules(RailPlacementRule::new, RailPlacementRule.KEY);
     }
-     static void main(String[] args) {
+     public static void main(String[] args) {
         AbyssLogger.printBanner();
         AbyssLogger.info("Starting Abyss Network...");
 
@@ -115,7 +122,8 @@ public class Main {
 
         instanceContainer.setChunkSupplier(LightingChunk::new);
 
-        GlobalEventHandler globalEventHandler = MinecraftServer.getGlobalEventHandler();
+        ApiClient.getInstance().init();
+        PlayerSync.register();
 
         StaffSystemExtension.register();
         MinecraftServer.getCommandManager().register(new VanishCommand());
@@ -126,6 +134,7 @@ public class Main {
         PlayerConfiguration.register(instanceContainer);
         PlayerLoaded.register();
 
+        KillTracker.register(); // must precede HealthManagement.register()
         HealthManagement.register();
         Rifle.register(instanceContainer);
         RocketLauncher.register(instanceContainer);
@@ -135,18 +144,18 @@ public class Main {
         MinecraftServer.getCommandManager().register(new GiveCommand());
         MinecraftServer.getCommandManager().register(new HelpCommand());
         MinecraftServer.getCommandManager().register(new WeaponChangerCommand());
+        MinecraftServer.getCommandManager().register(new StatsCommand());
 
         GamemodeSwitcher.register();
 
-        // World defining
+        // World loading
         try {
             instanceContainer.setChunkLoader(new PolarLoader(Path.of("worlds/world.polar")));
         } catch (IOException o) {
             AbyssLogger.error("Failed to load world: " + o.getMessage());
         }
-        /*
-        Server off save
-         */
+
+        // Save the world when the server shuts down
         SchedulerManager scheduler = MinecraftServer.getSchedulerManager();
         scheduler.buildShutdownTask(() -> {
             MinecraftServer.getConnectionManager().shutdown();
@@ -155,7 +164,7 @@ public class Main {
                 AbyssLogger.info("World Saved!");
                 Thread.sleep(500);
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                AbyssLogger.error("Failed to save world: " + e.getMessage());
             }
             AbyssLogger.warn("The server is shutting down!");
         });

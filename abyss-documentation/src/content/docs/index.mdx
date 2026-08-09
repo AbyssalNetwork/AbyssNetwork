@@ -1,40 +1,33 @@
 ---
-title: Welcome to Starlight
-description: Get started building your docs site with Starlight.
+title: Welcome to AbyssNetwork!
+description: Home
 template: splash # Remove or comment out this line to display the site sidebar on this page.
 hero:
-  tagline: Congrats on setting up a new Starlight project!
+  tagline: Welcome to AbyssNetwork! Here, we are in the process of developing an amazing WW2 themed shooter. We are excited to hear your ideas
   image:
-    file: ../../assets/houston.webp
+    file: ../../assets/rifle.png
   actions:
-    - text: Example Guide
-      link: /guides/example/
-      icon: right-arrow
-    - text: Read the Starlight docs
-      link: https://starlight.astro.build
-      icon: external
-      variant: minimal
+    - text: Our Documentation
+      link: /guides/gettingstarted/
+      icon: document
+    - text: Discord Server
+      link: 'https://discord.gg/SKdVD2WB5B'
+      icon: discord
+    - text: Our Github
+      link: 'https://github.com/AbyssalNetwork'
+      icon: github
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-## Next steps
+## Information
 
 <CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
-	</Card>
-	<Card title="Change page layout" icon="document">
-		Delete `template: splash` in `src/content/docs/index.mdx` to display a
-		sidebar on this page.
-	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
-	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
-	</Card>
-	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
-	</Card>
+    <Card title="Discord" icon="discord">
+        Here, we accept ideas related to the concept of our games! We highly recommend joining our Discord Server to create a suggestion in #ideas-to-add.
+    </Card>
+
+    <Card title="Github" icon="github">
+        AbyssalNetwork is an open-sourced coding project written by VardinsDev and Red_out respectively. If you are interested in fixing issues or optimizing the code on our behalf, feel free to create an issue and provide your own fixes for us to add (if approved).
+    </Card>
 </CardGrid>

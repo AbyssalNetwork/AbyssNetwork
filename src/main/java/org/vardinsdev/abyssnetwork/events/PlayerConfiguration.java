@@ -1,17 +1,13 @@
 package org.vardinsdev.abyssnetwork.events;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.instance.InstanceContainer;
 import org.vardinsdev.abyssnetwork.AbyssLogger;
-import org.vardinsdev.abyssnetwork.notUsedAnymore.Database.envHandler;
 import org.vardinsdev.abyssnetwork.staff.StaffManager;
 import org.vardinsdev.abyssnetwork.staff.StaffMember;
-
-import java.util.Objects;
 
 public class PlayerConfiguration {
     public static void register(InstanceContainer instanceContainer) {

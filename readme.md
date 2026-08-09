@@ -1,6 +1,6 @@
 # Abyss Network
 
-A custom Minecraft server built on [Minestom](https://minestom.net/), featuring weapon systems, world loading, database-backed player management, and environment-driven configuration.
+A custom Minecraft server built on [Minestom](https://minestom.net/), featuring weapon systems, world loading, an API-backed persistence layer, and environment-driven configuration.
 
 ---
 
@@ -28,19 +28,21 @@ A custom Minecraft server built on [Minestom](https://minestom.net/), featuring 
 
 Abyss Network is a Minestom-based game server for Minecraft 1.21.11. It replaces the standard Mojang server stack with a lightweight, custom implementation, giving full control over gameplay, world loading, player data, and server lifecycle.
 
-The server supports both a **production mode** (with MariaDB player persistence and online-mode authentication) and a **dev mode** (no database, offline-friendly, all players granted operator permissions automatically).
+The server supports both a **production mode** (API-backed persistence via the Go backend and online-mode authentication) and a **dev mode** (no API calls, offline-friendly).
 
 ---
 
 ## Features
 
 - **Online-mode authentication** via Minestom's `Auth.Online()`
-- **MariaDB player persistence** — player UUIDs, usernames, kills, deaths, team, rank, and op status are stored and synced on join
+- **API-backed persistence** — a Go backend service (`backend/`) owns a MariaDB/MySQL database and exposes a small REST API; the Java server persists players and staff through it asynchronously
+- **Kill/death tracking** — weapon kills (via MineGun's custom health system) and vanilla deaths are tracked and synced to the database (`POST /players/{uuid}/stats`)
+- **Stats viewing** — `/stats` (own) and `/stats <player>` (anyone, online or offline) in-game; web dashboard at `https://stats.vardinsdev.org/` with auto-refresh
 - **Polar world format** — worlds are loaded from `.polar` files and saved on shutdown
 - **Custom weapon system** — Rifle and Rocket Launcher via the [MineGun](https://github.com/AbyssalNetwork/minegun) library
 - **Block placement rules** — realistic block orientation and connection logic (stairs, slabs, fences, doors, signs, etc.)
 - **Gamemode switching** — players with permission level ≥ 2 can change their own gamemode
-- **Graceful shutdown** — world is saved to disk and the database connection is cleanly closed before the process exits
+- **Graceful shutdown** — world is saved to disk before the process exits
 - **Custom logger** — colour-coded, timestamped console output with an ASCII banner on startup
 - **Environment-based config** — all secrets and runtime flags live in a `.env` file, never in code
 
@@ -49,7 +51,8 @@ The server supports both a **production mode** (with MariaDB player persistence 
 ## Requirements
 
 - **Java 25** (required by Minestom 2026.x)
-- **MariaDB** (production only — any recent version works)
+- **Go 1.24+** (to build/run the backend)
+- **MariaDB or MySQL** (production only — any recent version works; `backend/docker-compose.yml` spins one up)
 - A Polar-format world file at `worlds/world.polar`
 - Gradle (the wrapper `./gradlew` is included)
 
@@ -59,16 +62,25 @@ The server supports both a **production mode** (with MariaDB player persistence 
 
 ### Environment Variables
 
-Create a `.env` file in the project root. The following keys are recognised:
+The **server** reads a `.env` file in the project root. The following keys are recognised:
 
 | Key | Required | Description |
 |-----|----------|-------------|
-| `TYPE` | Yes | Set to `dev` to enable dev mode (no DB, permission level 4 for all players). Any other value enables production mode. |
-| `DB_HOST` | Production | MariaDB host (e.g. `localhost`) |
-| `DB_PORT` | Production | MariaDB port (e.g. `3306`) |
-| `DB_NAME` | Production | Database name |
-| `DB_USER` | Production | Database username |
-| `DB_PASSWORD` | Production | Database password |
+| `TYPE` | Yes | Set to `dev` to disable API persistence (no backend required). Any other value enables production mode. |
+| `ABYSS_API_URL` | Production | Base URL of the Go backend (e.g. `http://localhost:8080` or `https://stats.vardinsdev.org/`) |
+| `ABYSS_API_TOKEN` | Production | Bearer token sent on all write requests. Must match the backend's `ABYSS_API_TOKEN`. |
+
+The **backend** reads `backend/.env` (see `backend/.env.example`):
+
+| Key | Required | Description |
+|-----|----------|-------------|
+| `ABYSS_HTTP_ADDR` | No | HTTP listen address (default `:8080`) |
+| `ABYSS_API_TOKEN` | Yes | Bearer token required for write endpoints; the Java server sends the same value |
+| `ABYSS_DB_HOST` | Yes | MariaDB/MySQL host (e.g. `localhost` or `db`) |
+| `ABYSS_DB_PORT` | Yes | Database port (e.g. `3306`) |
+| `ABYSS_DB_NAME` | Yes | Database name |
+| `ABYSS_DB_USER` | Yes | Database username |
+| `ABYSS_DB_PASSWORD` | Yes | Database password |
 
 **Example `.env` for local development:**
 
@@ -80,11 +92,8 @@ TYPE=dev
 
 ```env
 TYPE=prod
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=abyssnetwork
-DB_USER=abyss
-DB_PASSWORD=supersecretpassword
+ABYSS_API_URL=http://localhost:8080
+ABYSS_API_TOKEN=your-secret-token
 ```
 
 > ⚠️ Never commit your `.env` file. Add it to `.gitignore`.
@@ -111,6 +120,31 @@ The server will log an error and continue without a world if the file is missing
 
 The output JAR will be placed in `build/libs/`.
 
+### Running (production)
+
+Start the backend (MariaDB + API) with Docker Compose:
+
+```bash
+cd backend
+docker compose up -d
+```
+
+The Docker daemon is disabled at boot on the deployment host — re-enable it once with:
+
+```bash
+sudo systemctl enable --now docker
+```
+
+The containers are owned by the `abyss-backend` systemd user service; the public
+dashboard is served through the `abyss-stats` Cloudflare named tunnel
+(`cloudflared-stats` service) at `https://stats.vardinsdev.org/`.
+
+Then run the server with `TYPE=prod` and `ABYSS_API_URL` set in `.env`:
+
+```bash
+./gradlew run
+```
+
 ---
 
 ### Running
@@ -136,18 +170,33 @@ The server binds on `0.0.0.0:25565` by default.
 ## Project Structure
 
 ```
+backend/                                # Go persistence API
+│   main.go                             # Config, DB connection, HTTP server, graceful shutdown
+│   Dockerfile / docker-compose.yml     # Containerised MariaDB + API
+│   internal/store/                     # database/sql access + embedded schema
+│   internal/httpapi/                   # REST handlers (players, staff, health)
+│
 src/main/java/org/vardinsdev/abyssnetwork/
 │
 ├── Main.java                          # Server entry point, startup sequence
 ├── AbyssLogger.java                   # Colour-coded console logger
-├── envHandler.java                    # Dotenv loader wrapper
 │
 ├── Database/
-│   └── DatabaseManager.java           # MariaDB connection & table creation
+│   ├── Config.java                    # dotenv-driven config (TYPE, ABYSS_API_URL, ABYSS_API_TOKEN)
+│   ├── ApiClient.java                 # Async HTTP client for the Go backend
+│   ├── PlayerSync.java                # Player row upsert on join
+│   └── PlayerStats.java               # Player row DTO for the API
+│
+├── staff/
+│   ├── StaffManager.java              # In-memory staff cache, write-through to API
+│   ├── StaffMember.java / StaffRank.java
+│   └── StaffSystemExtension.java      # Staff join/spawn handling, vanish propagation
 │
 └── events/
-    ├── PlayerConfigurationEvent.java  # Spawn point, dev-mode permissions
-    └── GamemodeSwitcherEvent.java     # Permission-gated gamemode switching
+    ├── PlayerConfiguration.java       # Spawn point, staff permission levels
+    ├── ChatHandler.java               # Custom chat formatting
+    ├── KillTracker.java               # Kill/death tracking, syncs stats to API
+    └── GamemodeSwitcher.java          # Permission-gated gamemode switching
 ```
 
 ---
@@ -156,26 +205,38 @@ src/main/java/org/vardinsdev/abyssnetwork/
 
 ### Database
 
-`DatabaseManager` holds a single static `Connection` to MariaDB. On startup (production mode only), it:
+Persistence is owned by the Go backend (`backend/`), not by the game server.
 
-1. Connects using credentials from `.env`
-2. Creates the `players` table if it does not already exist
+- The **Go service** connects to MariaDB/MySQL with a connection pool, creates the schema on startup, and exposes a small REST API (`POST/GET /players`, `GET /players/by-username/{username}`, `POST /players/{uuid}/stats`, `GET/POST/DELETE /staff`, `GET /health`). It also serves a stats dashboard at `GET /stats`.
+- The **Java server** never talks to the database directly. `ApiClient` (`Database/ApiClient.java`) sends async HTTP requests via `HttpClient.sendAsync`, so database I/O never blocks the tick thread.
+- `StaffManager` keeps a fast in-memory cache for reads on join and write-throughs every mutation to the API (`addStaff`, `updateStaff`, `removeStaff`).
+- `PlayerSync` upserts the player's UUID/username on join; other stats are preserved by the backend on conflict.
+- `KillTracker` (`events/KillTracker.java`) watches MineGun's custom health tag and `PlayerDeathEvent` to credit kills and deaths, pushing deltas to `POST /players/{uuid}/stats` asynchronously. It must be registered before `HealthManagement.register()` so it observes the health drop before MineGun resets it.
 
-**Schema:**
+**Write authentication:** all mutating endpoints (`POST /players`, `POST /players/{uuid}/stats`, `POST /staff`, `DELETE /staff`) require `Authorization: Bearer <token>` where the token is `ABYSS_API_TOKEN`. The Java server reads the same variable from `.env` and sends it automatically. `GET` endpoints (stats dashboard, player lookups, staff listing) stay public, so the dashboard can be shared without exposing write access. If `ABYSS_API_TOKEN` is unset the API logs a warning and accepts writes without a token (local dev convenience).
+
+**Schema** (created automatically by the backend on startup):
 
 ```sql
 CREATE TABLE IF NOT EXISTS players (
-    uuid         VARCHAR(36)  PRIMARY KEY,
-    username     VARCHAR(16)  NOT NULL,
-    kills        INT          DEFAULT 0,
-    deaths       INT          DEFAULT 0,
-    team         INT          DEFAULT -1,
-    player_rank  VARCHAR(32)  DEFAULT 'default',
-    is_opped     BOOLEAN      DEFAULT FALSE
+    uuid        VARCHAR(36) PRIMARY KEY,
+    username    VARCHAR(16) NOT NULL,
+    kills       INT         DEFAULT 0,
+    deaths      INT         DEFAULT 0,
+    team        INT         DEFAULT -1,
+    player_rank VARCHAR(32) DEFAULT 'default',
+    is_opped    BOOLEAN     DEFAULT FALSE
+);
+
+CREATE TABLE IF NOT EXISTS staff (
+    uuid            VARCHAR(36) PRIMARY KEY,
+    last_known_name VARCHAR(16) NOT NULL,
+    rank            VARCHAR(32) NOT NULL,
+    vanished        BOOLEAN     DEFAULT FALSE
 );
 ```
 
-On each player join, an `INSERT ... ON DUPLICATE KEY UPDATE` query upserts the player's row, keeping the username current while preserving all other stats.
+Player upserts use `INSERT ... ON DUPLICATE KEY UPDATE` so the username stays current while all other stats are preserved.
 
 ---
 
@@ -183,9 +244,9 @@ On each player join, an `INSERT ... ON DUPLICATE KEY UPDATE` query upserts the p
 
 | Event class | Trigger | Behaviour |
 |---|---|---|
-| `PlayerConfigurationEvent` | `AsyncPlayerConfigurationEvent` | Sets spawn point; grants permission level 4 in dev mode |
-| `GamemodeSwitcherEvent` | `PlayerGameModeRequestEvent` | Allows gamemode change if permission level ≥ 2 |
-| `registerEvents()` (in `Main`) | `AsyncPlayerConfigurationEvent` | Upserts the player row in the database (production only) |
+| `PlayerConfiguration` | `AsyncPlayerConfigurationEvent` | Sets spawn point; applies staff permission levels |
+| `GamemodeSwitcher` | `PlayerGameModeRequestEvent` | Allows gamemode change if permission level ≥ 2 |
+| `PlayerSync` | `AsyncPlayerConfigurationEvent` | Upserts the player row via the API (production only) |
 
 ---
 
@@ -193,11 +254,10 @@ On each player join, an `INSERT ... ON DUPLICATE KEY UPDATE` query upserts the p
 
 When `TYPE=dev` is set in `.env`:
 
-- No database connection is attempted
-- Every player who joins is automatically granted **permission level 4** (full operator)
+- No API calls are made — `ApiClient` is disabled and player/staff data is not persisted
 - The server starts faster and works without any external infrastructure
 
-Switch to any other value (e.g. `prod`) to enable online-mode auth and database sync.
+Switch to any other value (e.g. `prod`) to enable online-mode auth and persistence via the Go backend.
 
 ---
 
@@ -205,14 +265,12 @@ Switch to any other value (e.g. `prod`) to enable online-mode auth and database 
 
 | Library | Purpose |
 |---|---|
-| [Minestom](https://github.com/minestom/Minestom) `2026.03.03-1.21.11` | Core server framework |
+| [Minestom](https://github.com/minestom/Minestom) `2026.07.12-26.2` | Core server framework |
 | [MineGun](https://github.com/AbyssalNetwork/minegun) `1.0.3` | Custom weapon system (Rifle, Rocket Launcher) |
 | [Placement](https://github.com/minestom-extras/placement) `0.1.0` | Block placement rules |
 | [Polar](https://github.com/hollow-cube/polar) `1.15.1` | Polar world format loader |
 | [dotenv-java](https://github.com/cdimascio/dotenv-java) `3.2.0` | `.env` file parsing |
-| [MariaDB JDBC](https://mariadb.com/kb/en/about-mariadb-connector-j/) `3.3.3` | Database driver |
-| [MySQL Connector/J](https://dev.mysql.com/downloads/connector/j/) `9.3.0` | MySQL compatibility |
-| [fastutil](https://fastutil.di.unimi.it/) `8.5.12` | High-performance collections |
+| [fastutil](https://fastutil.di.unimi.it/) `8.5.12` | High-performance collections (transitive for Polar) |
 | [SLF4J Simple](https://www.slf4j.org/) `2.0.13` | Logging backend |
 
 ---

@@ -5,7 +5,7 @@ import java.util.UUID;
 public class StaffMember {
     private UUID uuid;
     private String lastKnownName;
-    private StaffRank rank; // Changed from String to StaffRank
+    private StaffRank rank;
     private boolean vanished;
 
     public StaffMember() {}

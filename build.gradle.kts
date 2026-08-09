@@ -6,6 +6,12 @@ plugins {
 group = "org.vardinsdev.abyssnetwork"
 version = "1.0-SNAPSHOT"
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
 application {
     mainClass.set("org.vardinsdev.abyssnetwork.Main")  // ← tells Gradle where to start
 }
@@ -29,11 +35,9 @@ dependencies {
     implementation("com.github.AbyssalNetwork:minegun:1.0.3")
     implementation("rocks.minestom:placement:0.1.0")
     implementation("org.slf4j:slf4j-simple:2.0.13")
-    implementation("com.mysql:mysql-connector-j:9.3.0")
     implementation("dev.hollowcube:polar:1.15.1")
     implementation("io.github.cdimascio:dotenv-java:3.2.0")
     implementation("it.unimi.dsi:fastutil:8.5.12")
-    implementation("org.mariadb.jdbc:mariadb-java-client:3.3.3")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
 }
 
