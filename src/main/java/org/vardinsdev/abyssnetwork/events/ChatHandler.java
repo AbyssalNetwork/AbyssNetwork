@@ -8,6 +8,7 @@ import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.PlayerChatEvent;
 import org.vardinsdev.abyssnetwork.AbyssLogger;
 import org.vardinsdev.abyssnetwork.staff.StaffManager;
+import org.vardinsdev.abyssnetwork.staff.StaffMember;
 
 public class ChatHandler {
     public static void register() {
@@ -26,11 +27,13 @@ public class ChatHandler {
                         event.setCancelled(true);
 
                         // 2. Distribute only to online staff tracked by StaffManager
+                        StaffMember staff = StaffManager.getInstance().getStaff(player.getUuid());
+                        String rankPrefix = staff != null ? "[" + staff.getRank().getDisplayRank() + "] " : "";
                         for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
                             if (StaffManager.getInstance().isStaff(onlinePlayer.getUuid())) {
                                 onlinePlayer.sendMessage(Component.text()
                                         .append(Component.text("STAFF CHAT | ", NamedTextColor.LIGHT_PURPLE))
-                                        .append(Component.text(player.getUsername() + ": ", NamedTextColor.AQUA))
+                                        .append(Component.text(rankPrefix + player.getUsername() + ": ", NamedTextColor.AQUA))
                                         .append(Component.text(formattedMessage, NamedTextColor.LIGHT_PURPLE))
                                         .build());
                             }
@@ -52,12 +55,23 @@ public class ChatHandler {
     }
 
     private static void sendGlobalChat(Player player, String message) {
-        boolean isStaff = StaffManager.getInstance().isStaff(player.getUuid());
-        if (isStaff) {
-            //String rank =
-        }
+        StaffMember staff = StaffManager.getInstance().getStaff(player.getUuid());
+
         AbyssLogger.info("Chat: " + player.getUsername() + " >> " + message);
-        Component chatComponent = Component.text(player.getUsername() + " >> " + message);
+
+        Component chatComponent;
+        if (staff != null) {
+            // Prefix staff chat with their rank, coloured with the rank colour
+            chatComponent = Component.text()
+                    .append(Component.text("[", NamedTextColor.GRAY))
+                    .append(Component.text(staff.getRank().getDisplayRank(), staff.getRank().getColor()))
+                    .append(Component.text("] ", NamedTextColor.GRAY))
+                    .append(Component.text(player.getUsername() + " >> ", NamedTextColor.AQUA))
+                    .append(Component.text(message, NamedTextColor.WHITE))
+                    .build();
+        } else {
+            chatComponent = Component.text(player.getUsername() + " >> " + message);
+        }
 
         for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
             onlinePlayer.sendMessage(chatComponent);
