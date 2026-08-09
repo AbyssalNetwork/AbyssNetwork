@@ -51,7 +51,7 @@ public class VanishCommand extends Command {
                         player.removeEffect(PotionEffect.NIGHT_VISION);
                     }
 
-                    StaffManager.getInstance().saveStaffAsync();
+                    StaffManager.getInstance().updateStaff(staff);
                 } else {
                     sender.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
                     sender.sendMessage(Component.text("You must be a staff member to use this command!").color(NamedTextColor.AQUA));

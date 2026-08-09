@@ -1,24 +1,21 @@
 package org.vardinsdev.abyssnetwork.commands;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
 import org.vardinsdev.abyssnetwork.AbyssLogger;
 import org.vardinsdev.abyssnetwork.staff.StaffManager;
+import org.vardinsdev.abyssnetwork.staff.StaffMember;
+import org.vardinsdev.abyssnetwork.staff.StaffRank;
 
-import java.io.File;
+import java.util.Arrays;
 import java.util.UUID;
 
 public class GiveRankCommand extends Command {
-
-    private static final ObjectMapper MAPPER = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
-    private static final File STAFF_FILE = new File("config/staff.json");
 
     public GiveRankCommand() {
         super("giverank");
@@ -32,71 +29,44 @@ public class GiveRankCommand extends Command {
             String targetName = context.get(playerArgument);
             String rankName = context.get(rankArgument).toUpperCase();
 
-            // For a production server, you would ideally resolve the UUID via a Mojang API cache.
-            // For this local example, we'll simulate fetching a target online player's UUID:
-            Player targetPlayer = net.minestom.server.MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(targetName);
+            if (!StaffManager.getInstance().isStaff(sender.identity().uuid())) {
+                sender.sendMessage("You must be staff to give a rank!");
+                return;
+            }
+
+            // Resolve the target player's UUID (online-only in this implementation)
+            Player targetPlayer = MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(targetName);
 
             if (targetPlayer == null) {
                 sender.sendMessage("Player must be online to assign a rank via this simple command example!");
                 return;
             }
-            if (StaffManager.getInstance().isStaff(sender.identity().uuid())) {
-                UUID uuid = targetPlayer.getUuid();
 
-                try {
-                    ObjectNode rootNode;
-                    ObjectNode staffNode;
-
-                    // 1. Read existing file or create a fresh structure if missing
-                    if (STAFF_FILE.exists()) {
-                        rootNode = (ObjectNode) MAPPER.readTree(STAFF_FILE);
-                        staffNode = (ObjectNode) rootNode.get("staff");
-                        if (staffNode == null) {
-                            staffNode = MAPPER.createObjectNode();
-                            rootNode.set("staff", staffNode);
-                        }
-                    } else {
-                        STAFF_FILE.getParentFile().mkdirs();
-                        rootNode = MAPPER.createObjectNode();
-                        staffNode = MAPPER.createObjectNode();
-                        rootNode.set("staff", staffNode);
-                    }
-
-                    // 2. Create the updated staff member details
-                    ObjectNode memberDetails = MAPPER.createObjectNode();
-                    memberDetails.put("uuid", uuid.toString());
-                    memberDetails.put("lastKnownName", targetName);
-                    memberDetails.put("rank", rankName);
-                    memberDetails.put("vanished", false);
-
-                    // 3. Put it under the player's UUID key inside the "staff" block
-                    staffNode.set(uuid.toString(), memberDetails);
-
-                    // 4. Write the updated payload back to disk asynchronously
-                    java.util.concurrent.CompletableFuture.runAsync(() -> {
-                        try {
-                            MAPPER.writeValue(STAFF_FILE, rootNode);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    });
-
-                    sender.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-                    sender.sendMessage(Component.text("Successfully set " + targetName + "'s rank to " + rankName).color(NamedTextColor.AQUA));
-
-                    targetPlayer.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-                    targetPlayer.sendMessage(Component.text("Your staff rank has been updated to " + rankName).color(NamedTextColor.AQUA));
-
-                    AbyssLogger.warn(sender + " has given " + targetName + " the rank of " + rankName);
-
-                } catch (Exception e) {
-                    sender.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-                    sender.sendMessage("Error updating staff file!");
-                    e.printStackTrace();
-                }
-            } else {
-                sender.sendMessage("You must be staff to give a rank!");
+            StaffRank rank;
+            try {
+                rank = StaffRank.valueOf(rankName);
+            } catch (IllegalArgumentException e) {
+                sender.sendMessage("Unknown rank '" + rankName + "'. Valid ranks: " + Arrays.toString(StaffRank.values()));
+                return;
             }
+
+            UUID uuid = targetPlayer.getUuid();
+            StaffMember staff = StaffManager.getInstance().getStaff(uuid);
+            if (staff == null) {
+                staff = new StaffMember(uuid, targetName, rank);
+            } else {
+                staff.setLastKnownName(targetName);
+                staff.setRank(rank);
+            }
+            StaffManager.getInstance().addStaff(staff);
+
+            sender.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+            sender.sendMessage(Component.text("Successfully set " + targetName + "'s rank to " + rankName).color(NamedTextColor.AQUA));
+
+            targetPlayer.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+            targetPlayer.sendMessage(Component.text("Your staff rank has been updated to " + rankName).color(NamedTextColor.AQUA));
+
+            AbyssLogger.warn(sender + " has given " + targetName + " the rank of " + rankName);
 
         }, playerArgument, rankArgument);
     }

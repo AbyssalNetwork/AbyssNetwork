@@ -1,50 +1,45 @@
 package org.vardinsdev.abyssnetwork.staff;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import org.vardinsdev.abyssnetwork.AbyssLogger;
+import org.vardinsdev.abyssnetwork.Database.ApiClient;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 
+/**
+ * In-memory staff cache with write-through persistence to the Abyss Go backend.
+ * Reads happen synchronously from the cache (fast, join thread safe); every
+ * mutation is pushed to the API asynchronously. The old JSON-file based
+ * storage (config/staff.json) is gone.
+ */
 public class StaffManager {
     private static final StaffManager INSTANCE = new StaffManager();
     public static StaffManager getInstance() { return INSTANCE; }
 
-    private final File dataFile = new File("config/staff.json");
-    private final ObjectMapper mapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
     private final Map<UUID, StaffMember> staffCache = new HashMap<>();
 
     public void loadStaff() {
-        if (!dataFile.exists()) {
-            dataFile.getParentFile().mkdirs();
-            saveStaffAsync();
+        ApiClient api = ApiClient.getInstance();
+        if (!api.isEnabled()) {
+            AbyssLogger.warn("Skipping staff load: API client disabled (TYPE=dev).");
             return;
         }
-
-        try {
-            StaffDataWrapper data = mapper.readValue(dataFile, StaffDataWrapper.class);
-            if (data != null && data.getStaff() != null) {
-                staffCache.putAll(data.getStaff());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        api.fetchStaff()
+                .thenAccept(this::loadAll)
+                .exceptionally(ex -> {
+                    AbyssLogger.error("Failed to load staff from API: " + ex.getMessage());
+                    return null;
+                });
     }
 
-    public CompletableFuture<Void> saveStaffAsync() {
-        return CompletableFuture.runAsync(() -> {
-            try {
-                StaffDataWrapper wrapper = new StaffDataWrapper();
-                wrapper.setStaff(staffCache);
-                mapper.writeValue(dataFile, wrapper);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+    private void loadAll(List<StaffMember> staff) {
+        staffCache.clear();
+        for (StaffMember member : staff) {
+            staffCache.put(member.getUuid(), member);
+        }
+        AbyssLogger.success("Loaded " + staff.size() + " staff members from API.");
     }
 
     public boolean isStaff(UUID uuid) {
@@ -57,17 +52,24 @@ public class StaffManager {
 
     public void addStaff(StaffMember member) {
         staffCache.put(member.getUuid(), member);
-        saveStaffAsync();
+        writeThrough(member);
+    }
+
+    public void updateStaff(StaffMember member) {
+        staffCache.put(member.getUuid(), member);
+        writeThrough(member);
     }
 
     public void removeStaff(UUID uuid) {
         staffCache.remove(uuid);
-        saveStaffAsync(); // Persists the removal to staff.json right away
+        ApiClient.getInstance().deleteStaff(uuid);
     }
 
-    private static class StaffDataWrapper {
-        private Map<UUID, StaffMember> staff;
-        public Map<UUID, StaffMember> getStaff() { return staff; }
-        public void setStaff(Map<UUID, StaffMember> staff) { this.staff = staff; }
+    private void writeThrough(StaffMember member) {
+        ApiClient.getInstance().upsertStaff(member)
+                .exceptionally(ex -> {
+                    AbyssLogger.error("Failed to persist staff " + member.getUuid() + ": " + ex.getMessage());
+                    return null;
+                });
     }
 }
