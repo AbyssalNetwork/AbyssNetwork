@@ -28,7 +28,7 @@ A custom Minecraft server built on [Minestom](https://minestom.net/), featuring 
 
 Abyss Network is a Minestom-based game server for Minecraft 1.21.11. It replaces the standard Mojang server stack with a lightweight, custom implementation, giving full control over gameplay, world loading, player data, and server lifecycle.
 
-The server supports both a **production mode** (API-backed persistence via the Go backend and online-mode authentication) and a **dev mode** (no persistence, offline-friendly, all players granted operator permissions automatically).
+The server supports both a **production mode** (API-backed persistence via the Go backend and online-mode authentication) and a **dev mode** (no API calls, offline-friendly).
 
 ---
 
@@ -37,12 +37,12 @@ The server supports both a **production mode** (API-backed persistence via the G
 - **Online-mode authentication** via Minestom's `Auth.Online()`
 - **API-backed persistence** — a Go backend service (`backend/`) owns a MariaDB/MySQL database and exposes a small REST API; the Java server persists players and staff through it asynchronously
 - **Kill/death tracking** — weapon kills (via MineGun's custom health system) and vanilla deaths are tracked and synced to the database (`POST /players/{uuid}/stats`)
-- **Stats viewing** — `/stats` (own) and `/stats <player>` (anyone, online or offline) in-game; web dashboard at `http://localhost:8080/stats` with auto-refresh
+- **Stats viewing** — `/stats` (own) and `/stats <player>` (anyone, online or offline) in-game; web dashboard at `https://stats.vardinsdev.org/` with auto-refresh
 - **Polar world format** — worlds are loaded from `.polar` files and saved on shutdown
 - **Custom weapon system** — Rifle and Rocket Launcher via the [MineGun](https://github.com/AbyssalNetwork/minegun) library
 - **Block placement rules** — realistic block orientation and connection logic (stairs, slabs, fences, doors, signs, etc.)
 - **Gamemode switching** — players with permission level ≥ 2 can change their own gamemode
-- **Graceful shutdown** — world is saved to disk and the database connection is cleanly closed before the process exits
+- **Graceful shutdown** — world is saved to disk before the process exits
 - **Custom logger** — colour-coded, timestamped console output with an ASCII banner on startup
 - **Environment-based config** — all secrets and runtime flags live in a `.env` file, never in code
 
@@ -66,14 +66,16 @@ The **server** reads a `.env` file in the project root. The following keys are r
 
 | Key | Required | Description |
 |-----|----------|-------------|
-| `TYPE` | Yes | Set to `dev` to enable dev mode (no API calls, permission level 4 for all players). Any other value enables production mode. |
-| `ABYSS_API_URL` | Production | Base URL of the Go backend (e.g. `http://localhost:8080`) |
+| `TYPE` | Yes | Set to `dev` to disable API persistence (no backend required). Any other value enables production mode. |
+| `ABYSS_API_URL` | Production | Base URL of the Go backend (e.g. `http://localhost:8080` or `https://stats.vardinsdev.org/`) |
+| `ABYSS_API_TOKEN` | Production | Bearer token sent on all write requests. Must match the backend's `ABYSS_API_TOKEN`. |
 
 The **backend** reads `backend/.env` (see `backend/.env.example`):
 
 | Key | Required | Description |
 |-----|----------|-------------|
 | `ABYSS_HTTP_ADDR` | No | HTTP listen address (default `:8080`) |
+| `ABYSS_API_TOKEN` | Yes | Bearer token required for write endpoints; the Java server sends the same value |
 | `ABYSS_DB_HOST` | Yes | MariaDB/MySQL host (e.g. `localhost` or `db`) |
 | `ABYSS_DB_PORT` | Yes | Database port (e.g. `3306`) |
 | `ABYSS_DB_NAME` | Yes | Database name |
@@ -91,6 +93,7 @@ TYPE=dev
 ```env
 TYPE=prod
 ABYSS_API_URL=http://localhost:8080
+ABYSS_API_TOKEN=your-secret-token
 ```
 
 > ⚠️ Never commit your `.env` file. Add it to `.gitignore`.
@@ -119,20 +122,22 @@ The output JAR will be placed in `build/libs/`.
 
 ### Running (production)
 
-Start the backend (MariaDB + API) with [Tilt](https://tilt.dev) — live status,
-logs, and auto-rebuilds in a web UI:
-
-```bash
-tilt up
-```
-
-Or with plain Docker Compose:
+Start the backend (MariaDB + API) with Docker Compose:
 
 ```bash
 cd backend
-docker compose up -d      # or run MariaDB yourself and set backend/.env
-go run .
+docker compose up -d
 ```
+
+The Docker daemon is disabled at boot on the deployment host — re-enable it once with:
+
+```bash
+sudo systemctl enable --now docker
+```
+
+The containers are owned by the `abyss-backend` systemd user service; the public
+dashboard is served through the `abyss-stats` Cloudflare named tunnel
+(`cloudflared-stats` service) at `https://stats.vardinsdev.org/`.
 
 Then run the server with `TYPE=prod` and `ABYSS_API_URL` set in `.env`:
 
@@ -170,9 +175,6 @@ backend/                                # Go persistence API
 │   Dockerfile / docker-compose.yml     # Containerised MariaDB + API
 │   internal/store/                     # database/sql access + embedded schema
 │   internal/httpapi/                   # REST handlers (players, staff, health)
-│   cmd/migrate-staff/                  # One-shot importer for the legacy config/staff.json
-│
-Tiltfile                                # `tilt up` dev workflow (db + api, auto-rebuild)
 │
 src/main/java/org/vardinsdev/abyssnetwork/
 │
@@ -180,17 +182,21 @@ src/main/java/org/vardinsdev/abyssnetwork/
 ├── AbyssLogger.java                   # Colour-coded console logger
 │
 ├── Database/
-│   ├── Config.java                    # dotenv-driven config (TYPE, ABYSS_API_URL)
+│   ├── Config.java                    # dotenv-driven config (TYPE, ABYSS_API_URL, ABYSS_API_TOKEN)
 │   ├── ApiClient.java                 # Async HTTP client for the Go backend
-│   └── PlayerSync.java                # Player row upsert on join
+│   ├── PlayerSync.java                # Player row upsert on join
+│   └── PlayerStats.java               # Player row DTO for the API
 │
 ├── staff/
 │   ├── StaffManager.java              # In-memory staff cache, write-through to API
 │   ├── StaffMember.java / StaffRank.java
+│   └── StaffSystemExtension.java      # Staff join/spawn handling, vanish propagation
 │
 └── events/
-    ├── PlayerConfigurationEvent.java  # Spawn point, dev-mode permissions
-    └── GamemodeSwitcherEvent.java     # Permission-gated gamemode switching
+    ├── PlayerConfiguration.java       # Spawn point, staff permission levels
+    ├── ChatHandler.java               # Custom chat formatting
+    ├── KillTracker.java               # Kill/death tracking, syncs stats to API
+    └── GamemodeSwitcher.java          # Permission-gated gamemode switching
 ```
 
 ---
@@ -238,8 +244,8 @@ Player upserts use `INSERT ... ON DUPLICATE KEY UPDATE` so the username stays cu
 
 | Event class | Trigger | Behaviour |
 |---|---|---|
-| `PlayerConfigurationEvent` | `AsyncPlayerConfigurationEvent` | Sets spawn point; grants permission level 4 in dev mode |
-| `GamemodeSwitcherEvent` | `PlayerGameModeRequestEvent` | Allows gamemode change if permission level ≥ 2 |
+| `PlayerConfiguration` | `AsyncPlayerConfigurationEvent` | Sets spawn point; applies staff permission levels |
+| `GamemodeSwitcher` | `PlayerGameModeRequestEvent` | Allows gamemode change if permission level ≥ 2 |
 | `PlayerSync` | `AsyncPlayerConfigurationEvent` | Upserts the player row via the API (production only) |
 
 ---
@@ -248,8 +254,7 @@ Player upserts use `INSERT ... ON DUPLICATE KEY UPDATE` so the username stays cu
 
 When `TYPE=dev` is set in `.env`:
 
-- No API calls are made — `ApiClient` is disabled and staff/player data is not persisted
-- Every player who joins is automatically granted **permission level 4** (full operator)
+- No API calls are made — `ApiClient` is disabled and player/staff data is not persisted
 - The server starts faster and works without any external infrastructure
 
 Switch to any other value (e.g. `prod`) to enable online-mode auth and persistence via the Go backend.
@@ -260,14 +265,12 @@ Switch to any other value (e.g. `prod`) to enable online-mode auth and persisten
 
 | Library | Purpose |
 |---|---|
-| [Minestom](https://github.com/minestom/Minestom) `2026.03.03-1.21.11` | Core server framework |
+| [Minestom](https://github.com/minestom/Minestom) `2026.07.12-26.2` | Core server framework |
 | [MineGun](https://github.com/AbyssalNetwork/minegun) `1.0.3` | Custom weapon system (Rifle, Rocket Launcher) |
 | [Placement](https://github.com/minestom-extras/placement) `0.1.0` | Block placement rules |
 | [Polar](https://github.com/hollow-cube/polar) `1.15.1` | Polar world format loader |
 | [dotenv-java](https://github.com/cdimascio/dotenv-java) `3.2.0` | `.env` file parsing |
-| [MariaDB JDBC](https://mariadb.com/kb/en/about-mariadb-connector-j/) `3.3.3` | Database driver |
-| [MySQL Connector/J](https://dev.mysql.com/downloads/connector/j/) `9.3.0` | MySQL compatibility |
-| [fastutil](https://fastutil.di.unimi.it/) `8.5.12` | High-performance collections |
+| [fastutil](https://fastutil.di.unimi.it/) `8.5.12` | High-performance collections (transitive for Polar) |
 | [SLF4J Simple](https://www.slf4j.org/) `2.0.13` | Logging backend |
 
 ---

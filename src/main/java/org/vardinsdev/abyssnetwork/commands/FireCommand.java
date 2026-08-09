@@ -51,15 +51,13 @@ public class FireCommand extends Command {
 
             // 3. Notify the executor and the target player
             sender.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-            sender.sendMessage(Component.text("Successfully fired " + targetName + " (removed from rank " + oldRankName + ".").color(NamedTextColor.AQUA));
+            sender.sendMessage(Component.text("Successfully fired " + targetName + " (removed from rank " + oldRankName + ").").color(NamedTextColor.AQUA));
 
             targetPlayer.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
             targetPlayer.sendMessage(Component.text("You have been relieved of your duties and removed from the staff team.").color(NamedTextColor.AQUA));
 
             // Log the action
-            AbyssLogger.warn("[StaffSystem] " + sender.identity().identity().identity().identity() + " FIRED " + targetName + " (was " + oldRankName + ")");
-
-
+            AbyssLogger.warn("[StaffSystem] " + sender.identity().uuid() + " FIRED " + targetName + " (was " + oldRankName + ")");
         }, playerArgument);
     }
 }

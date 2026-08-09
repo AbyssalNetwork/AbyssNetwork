@@ -3,13 +3,14 @@ package org.vardinsdev.abyssnetwork.commands;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
+import org.vardinsdev.abyssnetwork.AbyssLogger;
 import org.vardinsdev.abyssnetwork.staff.StaffManager;
 import org.vardinsdev.abyssnetwork.staff.StaffMember;
-import org.vardinsdev.minegun.minegunLogger;
 
 public class VanishCommand extends Command {
     public VanishCommand() {
@@ -24,7 +25,7 @@ public class VanishCommand extends Command {
                     staff.setVanished(nextVanishState);
 
                     // Loop through all online players to update who can see this staff member
-                    for (Player onlinePlayer : net.minestom.server.MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+                    for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
                         if (onlinePlayer.equals(player)) continue; // Skip self
 
                         boolean isTargetStaff = StaffManager.getInstance().isStaff(onlinePlayer.getUuid());
@@ -57,7 +58,7 @@ public class VanishCommand extends Command {
                     sender.sendMessage(Component.text("You must be a staff member to use this command!").color(NamedTextColor.AQUA));
                 }
             } else {
-                minegunLogger.error("Console tried to vanish itself!");
+                AbyssLogger.error("Console tried to vanish itself!");
             }
         });
     }

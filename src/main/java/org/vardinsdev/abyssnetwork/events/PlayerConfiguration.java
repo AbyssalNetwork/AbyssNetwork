@@ -9,8 +9,6 @@ import org.vardinsdev.abyssnetwork.AbyssLogger;
 import org.vardinsdev.abyssnetwork.staff.StaffManager;
 import org.vardinsdev.abyssnetwork.staff.StaffMember;
 
-import java.util.Objects;
-
 public class PlayerConfiguration {
     public static void register(InstanceContainer instanceContainer) {
         GlobalEventHandler eventHandler = MinecraftServer.getGlobalEventHandler();
