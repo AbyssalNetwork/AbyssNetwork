@@ -9,7 +9,6 @@ import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
 import org.vardinsdev.abyssnetwork.Database.ApiClient;
-import org.vardinsdev.abyssnetwork.Database.PlayerStats;
 
 public class StatsCommand extends Command {
 

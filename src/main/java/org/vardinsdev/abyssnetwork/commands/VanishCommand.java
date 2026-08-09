@@ -34,6 +34,11 @@ public class VanishCommand extends Command {
                             // We are vanishing! Hide from normal players, keep visible for staff
                             if (!isTargetStaff) {
                                 player.removeViewer(onlinePlayer);
+
+                            } else {
+                                if (staff.getRank().ordinal() <= StaffManager.getInstance().getStaff(onlinePlayer.getUuid()).getRank().ordinal()) {
+                                    onlinePlayer.sendMessage(Component.text("[STAFF]" + player.getDisplayName() + "has joined in Vanish").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                                }
                             }
                         } else {
                             // We are unvanishing! Show to everyone
@@ -41,7 +46,7 @@ public class VanishCommand extends Command {
                         }
                     }
 
-                    if (nextVanishState) {
+                    if (nextVanishState)
                         player.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
                         player.sendMessage(Component.text("You are now vanished! (Hidden from regular players)").color(NamedTextColor.AQUA));
                         player.addEffect(new Potion(PotionEffect.NIGHT_VISION, (byte) 1, Potion.INFINITE_DURATION));

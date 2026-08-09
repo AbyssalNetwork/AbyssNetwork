@@ -8,7 +8,6 @@ import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.PlayerChatEvent;
 import org.vardinsdev.abyssnetwork.AbyssLogger;
 import org.vardinsdev.abyssnetwork.staff.StaffManager;
-import org.vardinsdev.abyssnetwork.staff.StaffMember;
 
 public class ChatHandler {
     public static void register() {
