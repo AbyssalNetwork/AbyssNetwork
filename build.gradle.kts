@@ -6,6 +6,12 @@ plugins {
 group = "org.vardinsdev.abyssnetwork"
 version = "1.0-SNAPSHOT"
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
 application {
     mainClass.set("org.vardinsdev.abyssnetwork.Main")  // ← tells Gradle where to start
 }
