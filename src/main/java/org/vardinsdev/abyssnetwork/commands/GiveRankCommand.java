@@ -50,6 +50,13 @@ public class GiveRankCommand extends Command {
                 return;
             }
 
+            if (sender instanceof Player player) {
+                if (StaffManager.getInstance().getStaff(player.getUuid()).getRank().ordinal() <= rank.ordinal()) {
+                    sender.sendMessage("You must be a higher rank than " + rankName + " to give out this rank!");
+                    return;
+                }
+            }
+
             UUID uuid = targetPlayer.getUuid();
             StaffMember staff = StaffManager.getInstance().getStaff(uuid);
             if (staff == null) {
