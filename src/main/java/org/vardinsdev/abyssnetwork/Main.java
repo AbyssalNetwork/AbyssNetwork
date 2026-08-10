@@ -10,12 +10,15 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.timer.SchedulerManager;
 import org.vardinsdev.abyssnetwork.Database.ApiClient;
 import org.vardinsdev.abyssnetwork.Database.PlayerSync;
+import org.vardinsdev.abyssnetwork.commands.BanCommand;
 import org.vardinsdev.abyssnetwork.commands.FireCommand;
 import org.vardinsdev.abyssnetwork.commands.GiveCommand;
 import org.vardinsdev.abyssnetwork.commands.GiveRankCommand;
 import org.vardinsdev.abyssnetwork.commands.HelpCommand;
+import org.vardinsdev.abyssnetwork.commands.KickCommand;
 import org.vardinsdev.abyssnetwork.commands.StaffHelpCommand;
 import org.vardinsdev.abyssnetwork.commands.StatsCommand;
+import org.vardinsdev.abyssnetwork.commands.UnbanCommand;
 import org.vardinsdev.abyssnetwork.commands.VanishCommand;
 import org.vardinsdev.abyssnetwork.commands.WeaponChangerCommand;
 import org.vardinsdev.abyssnetwork.events.ChatHandler;
@@ -142,6 +145,10 @@ public class Main {
         ChatHandler.register();
 
         MinecraftServer.getCommandManager().register(new GiveCommand());
+
+        MinecraftServer.getCommandManager().register(new KickCommand());
+        MinecraftServer.getCommandManager().register(new BanCommand());
+        MinecraftServer.getCommandManager().register(new UnbanCommand());
         MinecraftServer.getCommandManager().register(new HelpCommand());
         MinecraftServer.getCommandManager().register(new WeaponChangerCommand());
         MinecraftServer.getCommandManager().register(new StatsCommand());

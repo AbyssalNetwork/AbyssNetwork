@@ -1,13 +1,11 @@
 package org.vardinsdev.abyssnetwork.commands;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
 import org.vardinsdev.abyssnetwork.AbyssLogger;
+import org.vardinsdev.abyssnetwork.Messages;
 import org.vardinsdev.abyssnetwork.staff.StaffManager;
 import org.vardinsdev.abyssnetwork.staff.StaffMember;
 import org.vardinsdev.abyssnetwork.staff.StaffRank;
@@ -30,7 +28,7 @@ public class GiveRankCommand extends Command {
             String rankName = context.get(rankArgument).toUpperCase();
 
             if (!StaffManager.getInstance().isStaff(sender.identity().uuid())) {
-                sender.sendMessage("You must be staff to give a rank!");
+                sender.sendMessage(Messages.error("You must be staff to give a rank!"));
                 return;
             }
 
@@ -38,7 +36,7 @@ public class GiveRankCommand extends Command {
             Player targetPlayer = MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(targetName);
 
             if (targetPlayer == null) {
-                sender.sendMessage("Player must be online to assign a rank via this simple command example!");
+                sender.sendMessage(Messages.error("Player must be online to assign a rank via this simple command example!"));
                 return;
             }
 
@@ -46,13 +44,13 @@ public class GiveRankCommand extends Command {
             try {
                 rank = StaffRank.valueOf(rankName);
             } catch (IllegalArgumentException e) {
-                sender.sendMessage("Unknown rank '" + rankName + "'. Valid ranks: " + Arrays.toString(StaffRank.values()));
+                sender.sendMessage(Messages.error("Unknown rank '" + rankName + "'. Valid ranks: " + Arrays.toString(StaffRank.values())));
                 return;
             }
 
             if (sender instanceof Player player) {
                 if (StaffManager.getInstance().getStaff(player.getUuid()).getRank().ordinal() <= rank.ordinal()) {
-                    sender.sendMessage("You must be a higher rank than " + rankName + " to give out this rank!");
+                    sender.sendMessage(Messages.error("You must be a higher rank than " + rankName + " to give out this rank!"));
                     return;
                 }
             }
@@ -67,11 +65,12 @@ public class GiveRankCommand extends Command {
             }
             StaffManager.getInstance().addStaff(staff);
 
-            sender.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-            sender.sendMessage(Component.text("Successfully set " + targetName + "'s rank to " + rankName).color(NamedTextColor.AQUA));
+            // Apply the new permission level immediately instead of waiting for a rejoin.
+            targetPlayer.setPermissionLevel(rank.getPermissionLevel());
 
-            targetPlayer.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-            targetPlayer.sendMessage(Component.text("Your staff rank has been updated to " + rankName).color(NamedTextColor.AQUA));
+            sender.sendMessage(Messages.system("Successfully set " + targetName + "'s rank to " + rankName));
+
+            targetPlayer.sendMessage(Messages.system("Your staff rank has been updated to " + rankName));
 
             AbyssLogger.warn(sender + " has given " + targetName + " the rank of " + rankName);
 

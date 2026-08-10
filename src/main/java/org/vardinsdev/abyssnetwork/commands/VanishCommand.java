@@ -1,14 +1,12 @@
 package org.vardinsdev.abyssnetwork.commands;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
 import org.vardinsdev.abyssnetwork.AbyssLogger;
+import org.vardinsdev.abyssnetwork.Messages;
 import org.vardinsdev.abyssnetwork.staff.StaffManager;
 import org.vardinsdev.abyssnetwork.staff.StaffMember;
 import org.vardinsdev.abyssnetwork.staff.StaffSystemExtension;
@@ -35,26 +33,23 @@ public class VanishCommand extends Command {
                             if (onlinePlayer == player) continue;
                             StaffMember target = StaffManager.getInstance().getStaff(onlinePlayer.getUuid());
                             if (target != null && staff.getRank().ordinal() <= target.getRank().ordinal()) {
-                                onlinePlayer.sendMessage(Component.text("[STAFF] " + player.getUsername() + " has vanished").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                                onlinePlayer.sendMessage(Messages.info("[STAFF] " + player.getUsername() + " has vanished"));
                             }
                         }
 
-                        player.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-                        player.sendMessage(Component.text("You are now vanished! (Hidden from regular players)").color(NamedTextColor.AQUA));
+                        player.sendMessage(Messages.system("You are now vanished! (Hidden from regular players)"));
                         player.addEffect(new Potion(PotionEffect.NIGHT_VISION, (byte) 1, Potion.INFINITE_DURATION));
 
                     } else {
                         player.updateViewableRule(null);
 
-                        player.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-                        player.sendMessage(Component.text("You are no longer vanished.").color(NamedTextColor.AQUA));
+                        player.sendMessage(Messages.system("You are no longer vanished."));
                         player.removeEffect(PotionEffect.NIGHT_VISION);
                     }
 
                     StaffManager.getInstance().updateStaff(staff);
                 } else {
-                    sender.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-                    sender.sendMessage(Component.text("You must be a staff member to use this command!").color(NamedTextColor.AQUA));
+                    sender.sendMessage(Messages.system("You must be a staff member to use this command!"));
                 }
             } else {
                 AbyssLogger.error("Console tried to vanish itself!");

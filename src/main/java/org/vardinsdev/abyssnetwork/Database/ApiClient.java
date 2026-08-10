@@ -159,6 +159,47 @@ public class ApiClient {
         }
     }
 
+    // ---- bans ----
+
+    public CompletableFuture<Void> banPlayer(String uuid, String username, String reason, String bannedBy) {
+        if (!enabled) return CompletableFuture.completedFuture(null);
+        ObjectNode body = mapper.createObjectNode();
+        body.put("uuid", uuid);
+        body.put("username", username);
+        body.put("reason", reason);
+        body.put("bannedBy", bannedBy);
+        return send("POST", "/bans", body.toString())
+                .thenAccept(response -> {
+                })
+                .exceptionally(ex -> logFailure("POST /bans " + uuid, ex));
+    }
+
+    public CompletableFuture<Ban> fetchBan(String uuid) {
+        if (!enabled) return CompletableFuture.completedFuture(null);
+        return send("GET", "/bans/" + uuid, null)
+                .thenApply(response -> response.statusCode() / 100 == 2 ? parseBan(response.body()) : null)
+                .exceptionally(ex -> {
+                    logFailure("GET /bans/" + uuid, ex);
+                    return null;
+                });
+    }
+
+    public CompletableFuture<Void> unban(String uuid) {
+        if (!enabled) return CompletableFuture.completedFuture(null);
+        return send("DELETE", "/bans/" + uuid, null)
+                .thenAccept(response -> {
+                })
+                .exceptionally(ex -> logFailure("DELETE /bans/" + uuid, ex));
+    }
+
+    private Ban parseBan(String json) {
+        try {
+            return mapper.readValue(json, Ban.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse ban response", e);
+        }
+    }
+
     private Void logFailure(String request, Throwable ex) {
         AbyssLogger.error("API " + request + " failed: " + unwrap(ex).getMessage());
         return null;

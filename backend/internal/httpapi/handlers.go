@@ -112,3 +112,32 @@ func (s *Server) handleDeleteStaff(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusNoContent)
 }
+
+func (s *Server) handleBanPlayer(w http.ResponseWriter, r *http.Request) {
+	var b store.Ban
+	if err := decodeJSON(w, r, &b); err != nil {
+		return
+	}
+	if err := s.store.BanPlayer(r.Context(), b); err != nil {
+		s.writeStoreError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+}
+
+func (s *Server) handleGetBan(w http.ResponseWriter, r *http.Request) {
+	b, err := s.store.GetBan(r.Context(), r.PathValue("uuid"))
+	if err != nil {
+		s.writeStoreError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, b)
+}
+
+func (s *Server) handleUnban(w http.ResponseWriter, r *http.Request) {
+	if err := s.store.Unban(r.Context(), r.PathValue("uuid")); err != nil {
+		s.writeStoreError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}

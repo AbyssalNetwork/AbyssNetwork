@@ -18,3 +18,12 @@ CREATE TABLE IF NOT EXISTS staff (
     updated_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (uuid)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS bans (
+    uuid        VARCHAR(36)  NOT NULL,
+    username    VARCHAR(16)  NOT NULL,
+    reason      VARCHAR(255) NOT NULL,
+    banned_by   VARCHAR(36)  NOT NULL,
+    banned_at   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (uuid)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;

@@ -37,6 +37,9 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /staff", s.requireWriteAuth(s.handleUpsertStaff))
 	mux.HandleFunc("GET /staff/{uuid}", s.handleGetStaff)
 	mux.HandleFunc("DELETE /staff/{uuid}", s.requireWriteAuth(s.handleDeleteStaff))
+	mux.HandleFunc("POST /bans", s.requireWriteAuth(s.handleBanPlayer))
+	mux.HandleFunc("GET /bans/{uuid}", s.handleGetBan)
+	mux.HandleFunc("DELETE /bans/{uuid}", s.requireWriteAuth(s.handleUnban))
 	return s.recoverPanic(s.logRequests(mux))
 }
 

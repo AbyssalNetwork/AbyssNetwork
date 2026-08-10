@@ -1,12 +1,10 @@
 package org.vardinsdev.abyssnetwork.commands;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
+import org.vardinsdev.abyssnetwork.Messages;
 
-public class StaffHelpCommand extends Command{
+public class StaffHelpCommand extends Command {
     public StaffHelpCommand() {
         super("staff-help");
 
@@ -14,16 +12,21 @@ public class StaffHelpCommand extends Command{
             if(sender instanceof Player player) {
                 if(player.getPermissionLevel() >= 2) {
 
-                    player.sendMessage(Component.text("Abyss Network: Staff Information").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
+                    player.sendMessage(Messages.title("Abyss Network: Staff Information"));
 
                     player.sendMessage(""); // Spacer
-                    player.sendMessage(Component.text("- To use staff chat: %text").color(NamedTextColor.AQUA));
+                    player.sendMessage(Messages.info("- To use staff chat: %text"));
 
                     player.sendMessage(""); // Spacer
-                    player.sendMessage(Component.text("- '/give' (weapon name) is used to provide yourself with the defined weapon.").color(NamedTextColor.AQUA));
+                    player.sendMessage(Messages.info("- '/give' (weapon name) is used to provide yourself with the defined weapon."));
+                    player.sendMessage(Messages.info("- '/kick' (player) [reason] kicks an online player."));
+                    player.sendMessage(Messages.info("- '/ban' (player) [reason] bans an online or offline player."));
+                    player.sendMessage(Messages.info("- '/unban' (player) unbans a banned player."));
+                    player.sendMessage(Messages.info("- '/vanish' hides you from non-staff players."));
+                    player.sendMessage(Messages.info("- '/giverank' (player) (rank) assigns a staff rank."));
+                    player.sendMessage(Messages.info("- '/fire' (player) removes a player's staff rank."));
                 } else {
-                    player.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-                    player.sendMessage(Component.text("You must be a staff member to use this command!").color(NamedTextColor.AQUA));
+                    player.sendMessage(Messages.system("You must be a staff member to use this command!"));
                 }
             }
         }));

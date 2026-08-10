@@ -1,11 +1,9 @@
 package org.vardinsdev.abyssnetwork.commands;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
+import org.vardinsdev.abyssnetwork.Messages;
 import org.vardinsdev.minegun.Weapons.Rifle;
 import org.vardinsdev.minegun.Weapons.RocketLauncher;
 
@@ -22,15 +20,13 @@ public class WeaponChangerCommand extends Command {
                     player.getInventory().clear();
                     Rifle.givePlayer(player);
 
-                    player.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-                    player.sendMessage(Component.text("You have changed your weapon preference to 'Rifle'.").color(NamedTextColor.AQUA));
+                    player.sendMessage(Messages.system("You have changed your weapon preference to 'Rifle'."));
                 }
                 if (context.get(item).equalsIgnoreCase("rocketlauncher")) {
                     player.getInventory().clear();
                     RocketLauncher.givePlayer(player);
 
-                    player.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-                    player.sendMessage(Component.text("You have changed your weapon preference to 'Rocket Launcher'.").color(NamedTextColor.AQUA));
+                    player.sendMessage(Messages.system("You have changed your weapon preference to 'Rocket Launcher'."));
                 }
             }
         }, item);

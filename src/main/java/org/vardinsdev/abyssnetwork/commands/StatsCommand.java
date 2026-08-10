@@ -1,14 +1,13 @@
 package org.vardinsdev.abyssnetwork.commands;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
 import org.vardinsdev.abyssnetwork.Database.ApiClient;
+import org.vardinsdev.abyssnetwork.Database.PlayerStats;
+import org.vardinsdev.abyssnetwork.Messages;
 
 public class StatsCommand extends Command {
 
@@ -23,7 +22,7 @@ public class StatsCommand extends Command {
 
         addSyntax((sender, context) -> {
             if (!(sender instanceof Player player)) {
-                sender.sendMessage(Component.text("Usage: /stats <player>").color(NamedTextColor.RED));
+                sender.sendMessage(Messages.error("Usage: /stats <player>"));
                 return;
             }
             show(sender, player.getUsername());
@@ -33,8 +32,7 @@ public class StatsCommand extends Command {
     private static void show(CommandSender sender, String name) {
         ApiClient api = ApiClient.getInstance();
         if (!api.isEnabled()) {
-            sender.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-            sender.sendMessage(Component.text("Stats are unavailable in dev mode.").color(NamedTextColor.AQUA));
+            sender.sendMessage(Messages.system("Stats are unavailable in dev mode."));
             return;
         }
 
@@ -45,16 +43,14 @@ public class StatsCommand extends Command {
 
         future.thenAccept(stats -> {
             if (stats == null) {
-                sender.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-                sender.sendMessage(Component.text("No stats found for '" + name + "'.").color(NamedTextColor.AQUA));
+                sender.sendMessage(Messages.system("No stats found for '" + name + "'."));
                 return;
             }
             String kd = stats.getDeaths() > 0
                     ? String.format("%.2f", stats.getKills() / (double) stats.getDeaths())
                     : (stats.getKills() > 0 ? "inf" : "—");
-            sender.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-            sender.sendMessage(Component.text(stats.getUsername() + "'s Stats").color(NamedTextColor.LIGHT_PURPLE).decorate(TextDecoration.BOLD));
-            sender.sendMessage(Component.text("Kills: " + stats.getKills() + "  Deaths: " + stats.getDeaths() + "  K/D: " + kd).color(NamedTextColor.AQUA));
+            sender.sendMessage(Messages.title(stats.getUsername() + "'s Stats"));
+            sender.sendMessage(Messages.info("Kills: " + stats.getKills() + "  Deaths: " + stats.getDeaths() + "  K/D: " + kd));
         });
     }
 }

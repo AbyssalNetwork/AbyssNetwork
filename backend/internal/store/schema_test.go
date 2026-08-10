@@ -7,8 +7,8 @@ import (
 
 func TestSchemaStatements(t *testing.T) {
 	stmts := schemaStatements()
-	if len(stmts) != 2 {
-		t.Fatalf("expected 2 schema statements, got %d: %q", len(stmts), stmts)
+	if len(stmts) != 3 {
+		t.Fatalf("expected 3 schema statements, got %d: %q", len(stmts), stmts)
 	}
 	for _, s := range stmts {
 		if !strings.HasPrefix(s, "CREATE TABLE IF NOT EXISTS") {

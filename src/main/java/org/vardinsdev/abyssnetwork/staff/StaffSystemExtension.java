@@ -1,8 +1,5 @@
 package org.vardinsdev.abyssnetwork.staff;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.GlobalEventHandler;
@@ -10,6 +7,7 @@ import net.minestom.server.event.player.PlayerLoadedEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
+import org.vardinsdev.abyssnetwork.Messages;
 
 import java.util.UUID;
 
@@ -44,7 +42,7 @@ public class StaffSystemExtension {
             if (StaffManager.getInstance().isStaff(playerUuid)) {
                 StaffMember staff = StaffManager.getInstance().getStaff(playerUuid);
                 player.setPermissionLevel(staff.getRank().getPermissionLevel());
-                player.sendMessage(Component.text("[StaffSystem] Loaded in as " + staff.getRank()).color(NamedTextColor.RED));
+                player.sendMessage(Messages.info("[StaffSystem] Loaded in as " + staff.getRank()));
             }
         });
 
@@ -56,8 +54,7 @@ public class StaffSystemExtension {
             StaffMember joiningStaff = StaffManager.getInstance().getStaff(joiningPlayer.getUuid());
             if (joiningStaff != null && joiningStaff.isVanished()) {
                 applyVanishRule(joiningPlayer);
-                joiningPlayer.sendMessage(Component.text("Abyss Network System").color(NamedTextColor.DARK_PURPLE).decorate(TextDecoration.BOLD));
-                joiningPlayer.sendMessage(Component.text("You have joined in vanish!").color(NamedTextColor.AQUA));
+                joiningPlayer.sendMessage(Messages.system("You have joined in vanish!"));
                 joiningPlayer.addEffect(new Potion(PotionEffect.NIGHT_VISION, (byte) 1, Potion.INFINITE_DURATION));
             }
         });
