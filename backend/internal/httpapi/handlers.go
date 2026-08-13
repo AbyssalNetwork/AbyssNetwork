@@ -135,9 +135,18 @@ func (s *Server) handleGetBan(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleUnban(w http.ResponseWriter, r *http.Request) {
-	if err := s.store.Unban(r.Context(), r.PathValue("uuid")); err != nil {
+	if err := s.store.Unban(r.Context(), r.PathValue("uuid"), r.URL.Query().Get("by")); err != nil {
 		s.writeStoreError(w, err)
 		return
 	}
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (s *Server) handleBanHistory(w http.ResponseWriter, r *http.Request) {
+	history, err := s.store.ListBanHistory(r.Context())
+	if err != nil {
+		s.writeStoreError(w, err)
+		return
+	}
+	writeJSON(w, http.StatusOK, history)
 }

@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -40,26 +39,4 @@ func Open(dsn string) (*Store, error) {
 
 func (s *Store) Close() error {
 	return s.db.Close()
-}
-
-// EnsureSchema applies the embedded schema. Statements are executed one at a
-// time: database/sql only runs a single statement per Exec by default, so the
-// whole file cannot be sent as one query.
-func (s *Store) EnsureSchema(ctx context.Context) error {
-	for _, stmt := range schemaStatements() {
-		if _, err := s.db.ExecContext(ctx, stmt); err != nil {
-			return fmt.Errorf("schema: %w", err)
-		}
-	}
-	return nil
-}
-
-func schemaStatements() []string {
-	var out []string
-	for _, s := range strings.Split(schemaSQL, ";") {
-		if t := strings.TrimSpace(s); t != "" {
-			out = append(out, t)
-		}
-	}
-	return out
 }

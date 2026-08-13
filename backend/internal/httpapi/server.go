@@ -40,6 +40,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("POST /bans", s.requireWriteAuth(s.handleBanPlayer))
 	mux.HandleFunc("GET /bans/{uuid}", s.handleGetBan)
 	mux.HandleFunc("DELETE /bans/{uuid}", s.requireWriteAuth(s.handleUnban))
+	mux.HandleFunc("GET /ban-history", s.requireWriteAuth(s.handleBanHistory))
 	return s.recoverPanic(s.logRequests(mux))
 }
 

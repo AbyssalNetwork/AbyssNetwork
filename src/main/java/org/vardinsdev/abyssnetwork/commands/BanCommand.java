@@ -18,14 +18,14 @@ public class BanCommand extends Command {
         var reasonArgument = ArgumentType.StringArray("reason");
 
         addSyntax((sender, context) -> {
-            if (!StaffManager.getInstance().isStaff(sender.identity().uuid())) {
+            if (!StaffManager.getInstance().hasStaffAccess(sender)) {
                 sender.sendMessage(Messages.error("You must be staff to use this command!"));
                 return;
             }
 
             String targetName = context.get(playerArgument);
             String reason = String.join(" ", context.get(reasonArgument));
-            String bannedBy = sender.identity().uuid().toString();
+            String bannedBy = StaffManager.senderName(sender);
 
             Player online = MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(targetName);
             if (online != null) {
@@ -43,7 +43,7 @@ public class BanCommand extends Command {
                         .banPlayer(stats.getUuid(), stats.getUsername(), reason, bannedBy)
                         .thenRun(() -> {
                             sender.sendMessage(Messages.system("Banned " + targetName + "."));
-                            AbyssLogger.warn(sender + " banned " + targetName + " (" + reason + ")");
+                            AbyssLogger.warn(StaffManager.senderName(sender) + " banned " + targetName + " (" + reason + ")");
                         });
             });
         }, playerArgument, reasonArgument);
@@ -57,7 +57,7 @@ public class BanCommand extends Command {
                 target.kick(Messages.system("You have been banned from Abyss Network.", reason));
             }
             sender.sendMessage(Messages.system("Banned " + username + "."));
-            AbyssLogger.warn(sender + " banned " + username + " (" + reason + ")");
+            AbyssLogger.warn(StaffManager.senderName(sender) + " banned " + username + " (" + reason + ")");
         });
     }
 }

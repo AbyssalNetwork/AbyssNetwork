@@ -22,6 +22,11 @@ public class FireCommand extends Command {
         addSyntax((sender, context) -> {
             String targetName = context.get(playerArgument);
 
+            if (!StaffManager.getInstance().hasStaffAccess(sender)) {
+                sender.sendMessage(Messages.error("You must be staff to use this command!"));
+                return;
+            }
+
             // Look up the target player if they are online
             Player targetPlayer = MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(targetName);
 
@@ -51,7 +56,7 @@ public class FireCommand extends Command {
             targetPlayer.sendMessage(Messages.system("You have been relieved of your duties and removed from the staff team."));
 
             // Log the action
-            AbyssLogger.warn("[StaffSystem] " + sender.identity().uuid() + " FIRED " + targetName + " (was " + oldRankName + ")");
+            AbyssLogger.warn("[StaffSystem] " + StaffManager.senderName(sender) + " FIRED " + targetName + " (was " + oldRankName + ")");
         }, playerArgument);
     }
 }

@@ -22,6 +22,7 @@ public class StaffHelpCommand extends Command {
                     player.sendMessage(Messages.info("- '/kick' (player) [reason] kicks an online player."));
                     player.sendMessage(Messages.info("- '/ban' (player) [reason] bans an online or offline player."));
                     player.sendMessage(Messages.info("- '/unban' (player) unbans a banned player."));
+                    player.sendMessage(Messages.info("- '/ban-log' [page] lists the ban history."));
                     player.sendMessage(Messages.info("- '/vanish' hides you from non-staff players."));
                     player.sendMessage(Messages.info("- '/giverank' (player) (rank) assigns a staff rank."));
                     player.sendMessage(Messages.info("- '/fire' (player) removes a player's staff rank."));

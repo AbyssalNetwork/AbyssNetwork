@@ -184,12 +184,34 @@ public class ApiClient {
                 });
     }
 
-    public CompletableFuture<Void> unban(String uuid) {
+    public CompletableFuture<Void> unban(String uuid, String unbannedBy) {
         if (!enabled) return CompletableFuture.completedFuture(null);
-        return send("DELETE", "/bans/" + uuid, null)
+        return send("DELETE", "/bans/" + uuid + "?by=" + encodePath(unbannedBy), null)
                 .thenAccept(response -> {
                 })
                 .exceptionally(ex -> logFailure("DELETE /bans/" + uuid, ex));
+    }
+
+    public CompletableFuture<List<BanHistory>> fetchBanHistory() {
+        if (!enabled) return CompletableFuture.completedFuture(List.of());
+        return send("GET", "/ban-history", null)
+                .thenApply(response -> {
+                    if (response.statusCode() / 100 != 2) return List.<BanHistory>of();
+                    return parseBanHistory(response.body());
+                })
+                .exceptionally(ex -> {
+                    logFailure("GET /ban-history", ex);
+                    return List.of();
+                });
+    }
+
+    private List<BanHistory> parseBanHistory(String json) {
+        try {
+            return mapper.readValue(json, new TypeReference<List<BanHistory>>() {
+            });
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse ban history response", e);
+        }
     }
 
     private Ban parseBan(String json) {
@@ -231,7 +253,11 @@ public class ApiClient {
             return client.sendAsync(builder.build(), HttpResponse.BodyHandlers.ofString())
                     .thenApply(response -> {
                         if (response.statusCode() / 100 != 2) {
-                            AbyssLogger.warn("API " + method + " " + path + " -> " + response.statusCode() + ": " + response.body());
+                            if (response.statusCode() == 404) {
+                                AbyssLogger.info("API " + method + " " + path + " -> 404 (not found)");
+                            } else {
+                                AbyssLogger.warn("API " + method + " " + path + " -> " + response.statusCode() + ": " + response.body());
+                            }
                         }
                         return response;
                     });

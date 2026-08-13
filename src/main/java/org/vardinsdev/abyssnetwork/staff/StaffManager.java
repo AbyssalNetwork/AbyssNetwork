@@ -1,5 +1,8 @@
 package org.vardinsdev.abyssnetwork.staff;
 
+import net.minestom.server.command.CommandSender;
+import net.minestom.server.command.ConsoleSender;
+import net.minestom.server.entity.Player;
 import org.vardinsdev.abyssnetwork.AbyssLogger;
 import org.vardinsdev.abyssnetwork.Database.ApiClient;
 
@@ -44,6 +47,16 @@ public class StaffManager {
 
     public boolean isStaff(UUID uuid) {
         return staffCache.containsKey(uuid);
+    }
+
+    /** Whether a command sender may use staff commands: the console, or a registered staff member. */
+    public boolean hasStaffAccess(CommandSender sender) {
+        return sender instanceof ConsoleSender || isStaff(sender.identity().uuid());
+    }
+
+    /** Human-readable name for the actor behind a command: player username, or {@code CONSOLE}. */
+    public static String senderName(CommandSender sender) {
+        return sender instanceof Player player ? player.getUsername() : "CONSOLE";
     }
 
     public StaffMember getStaff(UUID uuid) {

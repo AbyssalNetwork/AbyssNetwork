@@ -17,7 +17,7 @@ public class KickCommand extends Command {
         var reasonArgument = ArgumentType.StringArray("reason").setDefaultValue(new String[]{"No reason provided"});
 
         addSyntax((sender, context) -> {
-            if (!StaffManager.getInstance().isStaff(sender.identity().uuid())) {
+            if (!StaffManager.getInstance().hasStaffAccess(sender)) {
                 sender.sendMessage(Messages.error("You must be staff to use this command!"));
                 return;
             }
@@ -32,7 +32,7 @@ public class KickCommand extends Command {
             String reason = String.join(" ", context.get(reasonArgument));
             target.kick(Messages.system("You have been kicked from Abyss Network.", reason));
             sender.sendMessage(Messages.system("Kicked " + target.getUsername() + "."));
-            AbyssLogger.warn(sender + " kicked " + target.getUsername() + " (" + reason + ")");
+            AbyssLogger.warn(StaffManager.senderName(sender) + " kicked " + target.getUsername() + " (" + reason + ")");
 
         }, playerArgument, reasonArgument);
     }

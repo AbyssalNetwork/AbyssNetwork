@@ -11,6 +11,7 @@ import net.minestom.server.timer.SchedulerManager;
 import org.vardinsdev.abyssnetwork.Database.ApiClient;
 import org.vardinsdev.abyssnetwork.Database.PlayerSync;
 import org.vardinsdev.abyssnetwork.commands.BanCommand;
+import org.vardinsdev.abyssnetwork.commands.BanLogCommand;
 import org.vardinsdev.abyssnetwork.commands.FireCommand;
 import org.vardinsdev.abyssnetwork.commands.GiveCommand;
 import org.vardinsdev.abyssnetwork.commands.GiveRankCommand;
@@ -32,7 +33,9 @@ import org.vardinsdev.minegun.Weapons.Rifle;
 import org.vardinsdev.minegun.Weapons.RocketLauncher;
 import rocks.minestom.placement.*;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
 
 public class Main {
@@ -149,6 +152,7 @@ public class Main {
         MinecraftServer.getCommandManager().register(new KickCommand());
         MinecraftServer.getCommandManager().register(new BanCommand());
         MinecraftServer.getCommandManager().register(new UnbanCommand());
+        MinecraftServer.getCommandManager().register(new BanLogCommand());
         MinecraftServer.getCommandManager().register(new HelpCommand());
         MinecraftServer.getCommandManager().register(new WeaponChangerCommand());
         MinecraftServer.getCommandManager().register(new StatsCommand());
@@ -178,6 +182,25 @@ public class Main {
 
         minecraftServer.start("0.0.0.0", 25565);
         AbyssLogger.success("Server started on port 25565");
+
+        startConsoleReader();
+    }
+
+    private static void startConsoleReader() {
+        var consoleSender = MinecraftServer.getCommandManager().getConsoleSender();
+        Thread consoleThread = new Thread(() -> {
+            try (var reader = new BufferedReader(new InputStreamReader(System.in))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.isBlank()) continue;
+                    MinecraftServer.getCommandManager().execute(consoleSender, line);
+                }
+            } catch (IOException e) {
+                AbyssLogger.error("Console input error: " + e.getMessage());
+            }
+        }, "ConsoleInput");
+        consoleThread.setDaemon(true);
+        consoleThread.start();
     }
 }
 

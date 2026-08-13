@@ -15,7 +15,7 @@ public class UnbanCommand extends Command {
         var playerArgument = ArgumentType.Word("player");
 
         addSyntax((sender, context) -> {
-            if (!StaffManager.getInstance().isStaff(sender.identity().uuid())) {
+            if (!StaffManager.getInstance().hasStaffAccess(sender)) {
                 sender.sendMessage(Messages.error("You must be staff to use this command!"));
                 return;
             }
@@ -27,9 +27,9 @@ public class UnbanCommand extends Command {
                     sender.sendMessage(Messages.error("No player found with the name '" + targetName + "'."));
                     return;
                 }
-                ApiClient.getInstance().unban(stats.getUuid()).thenRun(() -> {
+                ApiClient.getInstance().unban(stats.getUuid(), StaffManager.senderName(sender)).thenRun(() -> {
                     sender.sendMessage(Messages.system("Unbanned " + targetName + "."));
-                    AbyssLogger.warn(sender + " unbanned " + targetName);
+                    AbyssLogger.warn(StaffManager.senderName(sender) + " unbanned " + targetName);
                 });
             });
         }, playerArgument);

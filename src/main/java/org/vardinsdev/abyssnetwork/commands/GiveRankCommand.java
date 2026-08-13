@@ -27,7 +27,7 @@ public class GiveRankCommand extends Command {
             String targetName = context.get(playerArgument);
             String rankName = context.get(rankArgument).toUpperCase();
 
-            if (!StaffManager.getInstance().isStaff(sender.identity().uuid())) {
+            if (!StaffManager.getInstance().hasStaffAccess(sender)) {
                 sender.sendMessage(Messages.error("You must be staff to give a rank!"));
                 return;
             }
@@ -72,7 +72,7 @@ public class GiveRankCommand extends Command {
 
             targetPlayer.sendMessage(Messages.system("Your staff rank has been updated to " + rankName));
 
-            AbyssLogger.warn(sender + " has given " + targetName + " the rank of " + rankName);
+            AbyssLogger.warn(StaffManager.senderName(sender) + " has given " + targetName + " the rank of " + rankName);
 
         }, playerArgument, rankArgument);
     }

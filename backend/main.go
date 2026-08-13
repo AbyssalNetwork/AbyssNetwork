@@ -65,8 +65,8 @@ func main() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	if err := st.EnsureSchema(ctx); err != nil {
-		logger.Fatalf("schema: %v", err)
+	if err := st.Migrate(ctx); err != nil {
+		logger.Fatalf("migrate: %v", err)
 	}
 
 	logger.Printf("connected to %s at %s:%s/%s", user, host, port, name)
